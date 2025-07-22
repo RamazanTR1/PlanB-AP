@@ -1,13 +1,13 @@
 let accessToken: string | null = null;
 
 export const setAccessToken = (token: string | null) => {
-	accessToken = token;
+  accessToken = token;
 };
 
 export const getAccessToken = () => {
-	return accessToken;
+  return accessToken;
 };
 
 export const hasAccessToken = () => {
-	return accessToken !== null;
+  return accessToken !== null;
 };

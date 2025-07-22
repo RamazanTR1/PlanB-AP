@@ -1,95 +1,104 @@
-import { LoginStateContext } from "@/contexts/login-state-context";
-import { refreshTokens } from "@/utils/fetch-client";
-import { hasAccessToken, setAccessToken } from "@/utils/token-manager";
-import { Login, Logout } from "@/services/auth-services";
-import type { LoginRequest } from "@/types/auth-types";
-import { useQueryClient } from "@tanstack/react-query";
-
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { LoginContext } from "@/contexts/login-context";
+import { refreshTokens } from "@/utils/fetch-client";
+import {  hasAccessToken, setAccessToken } from "@/utils/token-manager";
+import { login, logout } from "@/services/login-service";
+import type { LoginRequest } from "@/types/auth.types";
 
-interface LoginStateProviderProps {
-	children: ReactNode;
+export interface LoginContextType {
+  isLoggedIn: boolean;
+  login: (request: LoginRequest) => Promise<void>;
+  logout: () => Promise<void>;
+  isActionable: boolean;
+  isLoading: boolean;
 }
 
-export const LoginStateProvider = ({ children }: LoginStateProviderProps) => {
-	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const [isStarted, setIsStarted] = useState<boolean>(false);
-	const effectRan = useRef(false);
-	const isActionable = isStarted && !isLoading;
-	const queryClient = useQueryClient();
-	const setTimer = useCallback(() => {
-		const timer = setTimeout(async () => {
-			await refreshTokens();
-			if (hasAccessToken()) {
-				setTimer();
-			}
-		}, 1000 * 60 * 12); // 12 minutes
-		return () => clearTimeout(timer);
-	}, []);
+export const LoginProvider = ({ children }: { children: ReactNode }) => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isStarted, setIsStarted] = useState(false);
 
-	useEffect(() => {
-		setIsStarted(true);
-		if (effectRan.current) return;
-		effectRan.current = true;
+  const effectRan = useRef(false);
 
-		const refreshTokenFn = async () => {
-			setIsLoading(true);
+  const isActionable = isStarted && !isLoading;
 
-			await refreshTokens();
-			const isLoggedIn = hasAccessToken();
+  const setTimer = useCallback(() => {
+    const timer = setTimeout(
+      async () => {
+        await refreshTokens();
+      },
+      1000 * 60 * 12,
+    );
 
-			setIsLoggedIn(isLoggedIn);
-			if (isLoggedIn) {
-				setTimer();
-			}
-			setIsLoading(false);
-		};
+    return () => clearTimeout(timer);
+  }, []);
 
-		refreshTokenFn();
-	}, [setTimer]);
+  useEffect(() => {
+    setIsStarted(true);
+    if (effectRan.current) return;
+    effectRan.current = true;
 
-	const handleLogout = async () => {
-		setIsLoading(true);
-		await Logout();
-		setAccessToken(null);
-		setIsLoggedIn(false);
-		setIsLoading(false);
-		queryClient.removeQueries();
-	};
+    const refreshTokenFn = async () => {
+      setIsLoading(true);
 
-	const handleLogin = async (request: LoginRequest) => {
-		queryClient.removeQueries();
+      await refreshTokens();
+      const isLoggedIn = hasAccessToken();
 
-		try {
-			const response = await Login(request);
+      setIsLoggedIn(isLoggedIn);
 
-			if (response.accessToken) {
-				const accessToken = response.accessToken;
-				setAccessToken(accessToken);
-				setIsLoggedIn(true);
-			} else {
-				setAccessToken(null);
-				setIsLoggedIn(false);
-			}
-		} catch (error) {
-			console.error(error);
-		}
-	};
+      if (isLoggedIn) {
+        setTimer();
+      }
 
-	return (
-		<LoginStateContext.Provider
-			value={{
-				isLoggedIn,
-				isLoading,
-				isStarted,
-				isActionable,
-				handleLogout,
-				handleLogin,
-			}}
-		>
-			{children}
-		</LoginStateContext.Provider>
-	);
+      setIsLoading(false);
+    };
+
+    refreshTokenFn();
+  }, [setTimer]);
+
+  const handleLogout = async () => {
+    setIsLoading(true);
+    try {
+      setAccessToken(null);
+      setIsLoggedIn(false);
+      await logout();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogin = async (request: LoginRequest) => {
+    setIsLoading(true);
+    try {
+      const response = await login(request);
+      if (response.accessToken) {
+        setAccessToken(response.accessToken);
+        setIsLoggedIn(true);
+      } else {
+        setAccessToken(null);
+        setIsLoggedIn(false);
+      }
+    } catch (error) {
+      setAccessToken(null);
+      setIsLoggedIn(false);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <LoginContext.Provider
+      value={{
+        isLoggedIn,
+        login: handleLogin,
+        logout: handleLogout,
+        isActionable,
+        isLoading,
+      }}
+    >
+      {children}
+    </LoginContext.Provider>
+  );
 };

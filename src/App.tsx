@@ -1,22 +1,33 @@
-import { Route, Routes, Navigate } from "react-router-dom";
-import MainPage from "./pages/main/page";
-import LoginPage from "./pages/login-page/page";
-import RegisterPage from "./pages/register-page/page";
-import { useLoginState } from "@/hooks/use-login-state";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { LoginProvider } from "./providers/login-state-provider";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import ProtectedRoute from "./providers/protected-route";
+import AdminLayout from "./components/admin-layout";
+import DashboardPage from "./pages/dashboard/dashboard-page";
+import UserListPage from "./pages/user/user-list-page";
+import LoginPage from "./pages/login/login-page";
+import RegisterPage from "./pages/register/register-page";
+
+const queryClient = new QueryClient();
 
 export default function App() {
-	const { isLoggedIn } = useLoginState();
 	return (
-		<Routes>
-			<Route path="/" element={<MainPage />} />
-			<Route
-				path="/login"
-				element={!isLoggedIn ? <LoginPage /> : <Navigate to="/" replace />}
-			/>
-			<Route
-				path="/register"
-				element={!isLoggedIn ? <RegisterPage /> : <Navigate to="/" replace />}
-			/>
-		</Routes>
+		<QueryClientProvider client={queryClient}>
+			<LoginProvider>
+				<BrowserRouter>
+					<Routes>
+						<Route element={<ProtectedRoute />} >
+							<Route path="/" element={<AdminLayout />} >
+								<Route path="/" element={<DashboardPage />} />
+								<Route path="/users" element={<UserListPage />} />
+							</Route>
+						</Route>
+						<Route path="/login" element={<LoginPage />} />
+						<Route path="/register" element={<RegisterPage />} /> 
+						{/* // TODO: Remove Register Page When We Are Done With Testing */}
+					</Routes>
+				</BrowserRouter>
+			</LoginProvider>
+		</QueryClientProvider>
 	);
 }
