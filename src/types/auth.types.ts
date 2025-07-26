@@ -13,3 +13,12 @@ export interface RegisterRequest {
     password: string;
 }
   
+
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

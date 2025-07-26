@@ -2,9 +2,10 @@ import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LoginContext } from "@/contexts/login-context";
 import { refreshTokens } from "@/utils/fetch-client";
-import {  hasAccessToken, setAccessToken } from "@/utils/token-manager";
+import { hasAccessToken, setAccessToken } from "@/utils/token-manager";
 import { login, logout } from "@/services/login-service";
 import type { LoginRequest } from "@/types/auth.types";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface LoginContextType {
   isLoggedIn: boolean;
@@ -18,6 +19,7 @@ export const LoginProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
+  const queryClient = useQueryClient();
 
   const effectRan = useRef(false);
 
@@ -60,9 +62,12 @@ export const LoginProvider = ({ children }: { children: ReactNode }) => {
   const handleLogout = async () => {
     setIsLoading(true);
     try {
+      await logout();
+      
       setAccessToken(null);
       setIsLoggedIn(false);
-      await logout();
+      
+      queryClient.removeQueries();
     } finally {
       setIsLoading(false);
     }
@@ -75,6 +80,8 @@ export const LoginProvider = ({ children }: { children: ReactNode }) => {
       if (response.accessToken) {
         setAccessToken(response.accessToken);
         setIsLoggedIn(true);
+        
+        await queryClient.invalidateQueries({ queryKey: ["me"] });
       } else {
         setAccessToken(null);
         setIsLoggedIn(false);

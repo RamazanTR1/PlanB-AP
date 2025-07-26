@@ -1,5 +1,3 @@
-"use client";
-
 import { objectToFormData } from "./object-to-form-data";
 import { getAccessToken, setAccessToken } from "./token-manager";
 
@@ -11,14 +9,19 @@ export const fetchClient = async <T, U>(
   const { body, ...rest } = options;
 
   const requestOptions: RequestInit = rest;
+  const locale = window.location.pathname.split("/")[1];
 
   headers.set("Accept", "application/json");
   headers.set("X-Client-Type", "web");
-	  const accessToken = getAccessToken();
+  headers.set("X-Locale", locale);
+  const accessToken = getAccessToken();
   if (accessToken) {
     headers.set("Authorization", `Bearer ${accessToken}`);
   }
-
+  headers.set(
+    "X-Client-Version",
+    import.meta.env.VITE_APP_VERSION || "1.0.0",
+  );
   headers.set("bypass-tunnel-reminder", "true");
 
   if (options?.method?.toUpperCase() === undefined) {
@@ -90,7 +93,7 @@ export const fetchClient = async <T, U>(
 };
 
 export const refreshTokens = async (): Promise<boolean> => {
-  const tokensResponse = await fetch(`/api/v1/auth/refresh`, {
+  const tokensResponse = await fetch("/api/v1/auth/refresh", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
