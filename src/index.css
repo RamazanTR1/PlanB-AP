@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
   :root {
@@ -28,33 +29,54 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem
+    --radius: 0.5rem;
   }
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    /* Dark Shades - Background Hues */
+    --dark-08: 0 0% 8%; /* #141414 */
+    --dark-10: 0 0% 10%; /* #1A1A1A */
+    --dark-15: 0 0% 15%; /* #262626 */
+    --dark-20: 0 0% 20%; /* #333333 */
+    --dark-25: 0 0% 25%; /* #404040 */
+    --dark-30: 0 0% 30%; /* #4D4D4D */
+    --dark-35: 0 0% 35%; /* #595959 */
+    --dark-40: 0 0% 40%; /* #666666 */
+
+    /* Grey Shades - Text Elements */
+    --grey-50: 240 2% 50%; /* #7E7E81 */
+    --grey-60: 240 2% 60%; /* #98989A */
+    --grey-70: 60 15% 65%; /* #B3B383 */
+    --grey-80: 0 0% 80%; /* #CCCCCC */
+    --grey-90: 240 3% 91%; /* #E4E4E7 */
+    --grey-95: 240 3% 95%; /* #F1F1F3 */
+    --grey-97: 240 3% 97%; /* #F7F7F8 */
+    --grey-99: 240 3% 99%; /* #FCFCFD */
+
+    /* Updated Dark Mode Variables */
+    --background: 0 0% 8%; /* #141414 - Dark background */
+    --foreground: 240 3% 99%; /* #FCFCFD - Light text */
+    --card: 0 0% 10%; /* #1A1A1A - Card background */
+    --card-foreground: 240 3% 97%; /* #F7F7F8 - Card text */
+    --popover: 0 0% 10%; /* #1A1A1A - Popover background */
+    --popover-foreground: 240 3% 97%; /* #F7F7F8 - Popover text */
+    --primary: 0 0% 98%; /* Light primary */
+    --primary-foreground: 0 0% 8%; /* Dark primary text */
+    --secondary: 0 0% 15%; /* #262626 - Secondary background */
+    --secondary-foreground: 240 3% 95%; /* #F1F1F3 - Secondary text */
+    --muted: 0 0% 15%; /* #262626 - Muted background */
+    --muted-foreground: 240 2% 60%; /* #98989A - Muted text */
+    --accent: 0 0% 20%; /* #333333 - Accent background */
+    --accent-foreground: 240 3% 95%; /* #F1F1F3 - Accent text */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 0 0% 20%; /* #333333 - Border color */
+    --input: 0 0% 15%; /* #262626 - Input background */
+    --ring: 240 3% 95%; /* #F1F1F3 - Ring color */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%
+    --chart-5: 340 75% 55%;
   }
 }
 
@@ -64,5 +86,102 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Animation classes */
+  .animate-fade-in {
+    animation: fadeIn 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  /* Page level animations */
+  .animate-page-fade {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  /* Card hover animations */
+  .animate-card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 10px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Stagger animation for grid items */
+  .animate-stagger {
+    animation: staggerFadeIn 0.6s ease-out forwards;
+  }
+
+  /* Pulse animation for loading states */
+  .animate-pulse-slow {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Keyframes */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.98) translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes staggerFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
 }

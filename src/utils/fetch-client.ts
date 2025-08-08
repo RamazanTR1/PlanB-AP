@@ -18,10 +18,7 @@ export const fetchClient = async <T, U>(
   if (accessToken) {
     headers.set("Authorization", `Bearer ${accessToken}`);
   }
-  headers.set(
-    "X-Client-Version",
-    import.meta.env.VITE_APP_VERSION || "1.0.0",
-  );
+  headers.set("X-Client-Version", import.meta.env.VITE_APP_VERSION || "1.0.0");
   headers.set("bypass-tunnel-reminder", "true");
 
   if (options?.method?.toUpperCase() === undefined) {
@@ -37,8 +34,6 @@ export const fetchClient = async <T, U>(
       if (requestOptions.method?.toUpperCase() === "GET") {
         const [baseUrl, queryString] = url.split("?");
         const existingParams = new URLSearchParams(queryString);
-
-        // new URLSearchParams expects an object, not a JSON string!
         const newParams = new URLSearchParams();
 
         Object.entries(body as Record<string, unknown>).forEach(
@@ -53,12 +48,10 @@ export const fetchClient = async <T, U>(
           },
         );
 
-        // Now copy existing params into newParams
         existingParams.forEach((value, key) => {
           newParams.set(key, value);
         });
 
-        // Build final URL
         url = `${baseUrl}?${newParams.toString()}`;
       } else {
         requestOptions.body = JSON.stringify(body);
