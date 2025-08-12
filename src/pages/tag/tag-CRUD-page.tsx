@@ -15,12 +15,9 @@ import {
   Edit,
   Trash2,
   Tag as TagIcon,
-  Loader2,
   Filter,
   Grid3X3,
   List,
-  ChevronLeft,
-  ChevronRight,
   ChevronDown,
 } from "lucide-react";
 import { useTagList, useDeleteTag } from "@/hooks/use-tag";
@@ -31,10 +28,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useDeleteConfirmation } from "@/components/confirm-delete";
+import { useDeleteConfirmation } from "@/hooks/use-delete-confirmation";
 import TagCreateModal from "@/components/tag-create-modal";
 import TagEditModal from "@/components/tag-edit-modal";
 import type { Tag } from "@/types/tag.types";
+import PaginationBar from "@/components/pagination";
+import LoaderDots from "@/components/ui/loader-dots";
 
 // Sort options for multi-select
 const sortOptions = [
@@ -184,7 +183,7 @@ export default function TagListPage() {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                 <Input
                   placeholder="Etiket ara..."
-                  className="pl-10 transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-none"
+                  className="pl-10 focus:border-transparent focus:pl-4 dark:border-none"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                 />
@@ -263,31 +262,7 @@ export default function TagListPage() {
           </CardHeader>
           <CardContent className="p-6">
             {isLoading ? (
-              <div className="flex h-64 items-center justify-center">
-                <div className="animate-fade-in text-center">
-                  <div className="relative">
-                    <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
-                    <div className="absolute inset-0 h-12 w-12 animate-pulse rounded-full border-4 border-blue-200"></div>
-                  </div>
-                  <p className="mt-4 font-medium text-gray-600 dark:text-gray-300">
-                    Etiketler yükleniyor...
-                  </p>
-                  <div className="mt-4 flex justify-center space-x-1">
-                    <div
-                      className="h-2 w-2 animate-bounce rounded-full bg-blue-400"
-                      style={{ animationDelay: "0ms" }}
-                    ></div>
-                    <div
-                      className="h-2 w-2 animate-bounce rounded-full bg-blue-400"
-                      style={{ animationDelay: "150ms" }}
-                    ></div>
-                    <div
-                      className="h-2 w-2 animate-bounce rounded-full bg-blue-400"
-                      style={{ animationDelay: "300ms" }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
+              <LoaderDots message="Etiketler yükleniyor..." />
             ) : tags.length === 0 ? (
               <div className="flex h-64 items-center justify-center">
                 <div className="animate-fade-in text-center">
@@ -376,37 +351,11 @@ export default function TagListPage() {
         </Card>
 
         {/* Pagination */}
-        {!isLoading && (
-          <div className="rounded-lg border border-gray-200 bg-white/80 p-4 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/80">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Sayfa {page + 1} / {totalPages}
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(page - 1)}
-                  disabled={page === 0}
-                  className="transition-all duration-200 hover:bg-blue-100 hover:text-blue-700"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Önceki
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(page + 1)}
-                  disabled={page >= totalPages - 1}
-                  className="transition-all duration-200 hover:bg-blue-100 hover:text-blue-700"
-                >
-                  Sonraki
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        <PaginationBar
+          page={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
 
         {/* Delete Confirmation Modal */}
         <DeleteModal />

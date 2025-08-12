@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import PaginationBar from "@/components/pagination";
 import { Input } from "@/components/ui/input";
 import {
   Search,
@@ -15,10 +16,7 @@ import {
   Edit,
   Trash2,
   Building2,
-  Loader2,
   Filter,
-  ChevronLeft,
-  ChevronRight,
   ChevronDown,
 } from "lucide-react";
 import PartnerCreateModal from "@/components/partner-create-modal";
@@ -30,10 +28,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useDeleteConfirmation } from "@/components/confirm-delete";
+import { useDeleteConfirmation } from "@/hooks/use-delete-confirmation";
 import { usePartnerList, useDeletePartnerById } from "@/hooks/use-partner";
 import type { Partner } from "@/types/partner.types";
-import { getAssetUrl } from "@/utils/asset-url";
+import LoaderDots from "@/components/ui/loader-dots";
 
 // Sort options
 const sortOptions = [
@@ -73,14 +71,18 @@ export default function PartnerCRUDPage() {
       : allPartners;
     const [field, direction] = (sort[0] || "name,asc").split(",");
     const sorted = [...base].sort((a, b) => {
-      const av = (a as any)[field];
-      const bv = (b as any)[field];
+      const typedA = a as unknown as Record<string, string | number>;
+      const typedB = b as unknown as Record<string, string | number>;
+      const av = typedA[field];
+      const bv = typedB[field];
       if (typeof av === "string" && typeof bv === "string") {
         return direction === "asc"
           ? av.localeCompare(bv)
           : bv.localeCompare(av);
       }
-      return direction === "asc" ? av - bv : bv - av;
+      const an = typeof av === "number" ? av : Number(av);
+      const bn = typeof bv === "number" ? bv : Number(bv);
+      return direction === "asc" ? an - bn : bn - an;
     });
     return sorted;
   }, [allPartners, debouncedSearch, sort]);
@@ -199,7 +201,7 @@ export default function PartnerCRUDPage() {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                 <Input
                   placeholder="Partner ara..."
-                  className="pl-10 transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-none"
+                  className="pl-10 focus:border-transparent focus:pl-4 dark:border-none"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                 />
@@ -256,17 +258,7 @@ export default function PartnerCRUDPage() {
           </CardHeader>
           <CardContent className="p-6">
             {isLoading ? (
-              <div className="flex h-64 items-center justify-center">
-                <div className="animate-fade-in text-center">
-                  <div className="relative">
-                    <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
-                    <div className="absolute inset-0 h-12 w-12 animate-pulse rounded-full border-4 border-blue-200"></div>
-                  </div>
-                  <p className="mt-4 font-medium text-gray-600 dark:text-gray-300">
-                    Partnerler yükleniyor...
-                  </p>
-                </div>
-              </div>
+              <LoaderDots message="Partnerler yükleniyor..." />
             ) : partners.length === 0 ? (
               <div className="flex h-64 items-center justify-center">
                 <div className="animate-fade-in text-center">
@@ -306,7 +298,7 @@ export default function PartnerCRUDPage() {
                           <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-medium text-white">
                             {partner.icon ? (
                               <img
-                                src={getAssetUrl(partner.icon)}
+                                src={partner.icon}
                                 alt={partner.name}
                                 className="h-full w-full object-cover"
                                 onError={(e) => {
@@ -358,37 +350,11 @@ export default function PartnerCRUDPage() {
         </Card>
 
         {/* Pagination */}
-        {!isLoading && (
-          <div className="rounded-lg border border-gray-200 bg-white/80 p-4 shadow-lg backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/80">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Sayfa {page + 1} / {totalPages}
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(page - 1)}
-                  disabled={page === 0}
-                  className="transition-all duration-200 hover:bg-blue-100 hover:text-blue-700"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Önceki
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(page + 1)}
-                  disabled={page >= totalPages - 1}
-                  className="transition-all duration-200 hover:bg-blue-100 hover:text-blue-700"
-                >
-                  Sonraki
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        <PaginationBar
+          page={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
 
         {/* Delete Confirmation Modal */}
         <DeleteModal />

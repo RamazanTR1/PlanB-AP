@@ -1,4 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuthQuery } from "./use-auth-query";
 import {
   getTeamMemberList,
   getTeamMemberById,
@@ -10,7 +11,7 @@ import type { TeamMemberRequest } from "@/types/team-member-types";
 import { toast } from "sonner";
 
 export const useTeamMemberList = (page: number, size: number, sort: string) => {
-  return useQuery({
+  return useAuthQuery({
     queryKey: ["team-member-list", page, size, sort],
     queryFn: () => getTeamMemberList(page, size, sort),
     staleTime: 2 * 60 * 1000,
@@ -18,7 +19,7 @@ export const useTeamMemberList = (page: number, size: number, sort: string) => {
 };
 
 export const useTeamMemberById = (id: number) => {
-  return useQuery({
+  return useAuthQuery({
     queryKey: ["team-member-by-id", id],
     queryFn: () => getTeamMemberById(id),
     staleTime: 10 * 60 * 1000,

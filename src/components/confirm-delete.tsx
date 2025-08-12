@@ -62,7 +62,7 @@ interface DeleteConfirmationModalProps {
   children?: React.ReactNode;
 }
 
-export default function DeleteConfirmationModal({
+function DeleteConfirmationModal({
   isOpen,
   onClose,
   onConfirm,
@@ -202,41 +202,7 @@ export default function DeleteConfirmationModal({
 }
 
 // Hook for easier usage
-export function useDeleteConfirmation() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [deleteConfig, setDeleteConfig] = useState<
-    Partial<DeleteConfirmationModalProps>
-  >({});
+// Hook moved to `src/hooks/use-delete-confirmation.tsx` to satisfy
+// react-refresh rule (file should only export components).
 
-  const openDeleteModal = (
-    config: Partial<DeleteConfirmationModalProps> & {
-      entityType: EntityType;
-      onConfirm: () => Promise<void> | void;
-    },
-  ) => {
-    setDeleteConfig(config);
-    setIsOpen(true);
-  };
-
-  const closeDeleteModal = () => {
-    setIsOpen(false);
-    setDeleteConfig({});
-  };
-
-  const DeleteModal = () => (
-    <DeleteConfirmationModal
-      {...deleteConfig}
-      isOpen={isOpen}
-      onClose={closeDeleteModal}
-      entityType={deleteConfig.entityType!}
-      onConfirm={deleteConfig.onConfirm!}
-    />
-  );
-
-  return {
-    openDeleteModal,
-    closeDeleteModal,
-    DeleteModal,
-    isOpen,
-  };
-}
+export default DeleteConfirmationModal;

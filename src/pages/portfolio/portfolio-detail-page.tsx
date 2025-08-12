@@ -1,6 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { usePortfolioById } from "@/hooks/use-portfolio";
-import { getAssetUrl } from "@/utils/asset-url";
 import {
   Card,
   CardContent,
@@ -69,7 +68,7 @@ export default function PortfolioDetailPage() {
                   className="overflow-hidden rounded-lg border border-gray-200 bg-white/70 shadow-sm dark:border-gray-700 dark:bg-gray-900/40"
                 >
                   <img
-                    src={getAssetUrl(a.asset)}
+                    src={a.asset}
                     alt="asset"
                     className="h-48 w-full object-cover"
                   />

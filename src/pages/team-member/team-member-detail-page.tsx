@@ -19,11 +19,12 @@ import {
   MessageSquare,
   Linkedin,
 } from "lucide-react";
+import LoaderDots from "@/components/ui/loader-dots";
 import {
   useTeamMemberById,
   useDeleteTeamMember,
 } from "@/hooks/use-team-member";
-import { useDeleteConfirmation } from "@/components/confirm-delete";
+import { useDeleteConfirmation } from "@/hooks/use-delete-confirmation";
 
 export default function TeamMemberDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -101,31 +102,7 @@ export default function TeamMemberDetailPage() {
   if (isLoading) {
     return (
       <div className="animate-page-fade space-y-6">
-        <div className="flex h-64 items-center justify-center">
-          <div className="animate-fade-in text-center">
-            <div className="relative">
-              <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
-              <div className="absolute inset-0 h-12 w-12 animate-pulse rounded-full border-4 border-blue-200"></div>
-            </div>
-            <p className="mt-4 font-medium text-gray-600 dark:text-gray-300">
-              Takım üyesi yükleniyor...
-            </p>
-            <div className="mt-4 flex justify-center space-x-1">
-              <div
-                className="h-2 w-2 animate-bounce rounded-full bg-blue-400"
-                style={{ animationDelay: "0ms" }}
-              ></div>
-              <div
-                className="h-2 w-2 animate-bounce rounded-full bg-blue-400"
-                style={{ animationDelay: "150ms" }}
-              ></div>
-              <div
-                className="h-2 w-2 animate-bounce rounded-full bg-blue-400"
-                style={{ animationDelay: "300ms" }}
-              ></div>
-            </div>
-          </div>
-        </div>
+        <LoaderDots message="Takım üyesi yükleniyor..." />
       </div>
     );
   }

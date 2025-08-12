@@ -1,4 +1,5 @@
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuthQuery } from "./use-auth-query";
 import {
   getServiceList,
   createService,
@@ -15,7 +16,7 @@ export const useServiceList = (
   size: number,
   sort: string,
 ) => {
-  return useQuery({
+  return useAuthQuery({
     queryKey: ["service-list", search, page, size, sort],
     queryFn: () => getServiceList(search, page, size, sort),
     staleTime: 2 * 60 * 1000,
@@ -23,7 +24,7 @@ export const useServiceList = (
 };
 
 export const useServiceById = (id: number) => {
-  return useQuery({
+  return useAuthQuery({
     queryKey: ["service-by-id", id],
     queryFn: () => getServiceById(id),
     staleTime: 10 * 60 * 1000,

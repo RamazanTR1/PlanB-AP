@@ -29,6 +29,7 @@ import {
   User,
   Hash,
 } from "lucide-react";
+import LoaderDots from "@/components/ui/loader-dots";
 import {
   useTeamMemberList,
   useDeleteTeamMember,
@@ -40,8 +41,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useDeleteConfirmation } from "@/components/confirm-delete";
+import { useDeleteConfirmation } from "@/hooks/use-delete-confirmation";
 import type { TeamMember } from "@/types/team-member-types";
+import PaginationBar from "@/components/pagination";
 
 // Sort options for multi-select
 const sortOptions = [
@@ -241,31 +243,10 @@ export default function TeamMemberListPage() {
           </CardHeader>
           <CardContent className="p-6">
             {isLoading ? (
-              <div className="flex h-32 items-center justify-center">
-                <div className="animate-fade-in text-center">
-                  <div className="relative mx-auto mb-3">
-                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600"></div>
-                    <div className="absolute inset-0 h-8 w-8 animate-ping rounded-full border border-blue-400 opacity-20"></div>
-                  </div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                    Takım üyeleri yükleniyor...
-                  </p>
-                  <div className="mt-2 flex justify-center space-x-1">
-                    <div
-                      className="h-1 w-1 animate-bounce rounded-full bg-blue-400"
-                      style={{ animationDelay: "0ms" }}
-                    ></div>
-                    <div
-                      className="h-1 w-1 animate-bounce rounded-full bg-blue-400"
-                      style={{ animationDelay: "150ms" }}
-                    ></div>
-                    <div
-                      className="h-1 w-1 animate-bounce rounded-full bg-blue-400"
-                      style={{ animationDelay: "300ms" }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
+              <LoaderDots
+                message="Takım üyeleri yükleniyor..."
+                heightClass="h-32"
+              />
             ) : teamMembers.length === 0 ? (
               <div className="flex h-64 items-center justify-center">
                 <div className="animate-fade-in text-center">
@@ -423,60 +404,11 @@ export default function TeamMemberListPage() {
         </Card>
 
         {/* Pagination */}
-        {totalElements > 0 && (
-          <Card className="animate-fade-in border-0 bg-white/80 shadow-lg backdrop-blur-sm dark:bg-gray-800/80">
-            <CardContent className="p-6">
-              <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                  Toplam{" "}
-                  <span className="font-semibold text-blue-600">
-                    {totalElements}
-                  </span>{" "}
-                  takım üyesinden{" "}
-                  <span className="font-semibold text-blue-600">
-                    {page * size + 1}
-                  </span>
-                  -
-                  <span className="font-semibold text-blue-600">
-                    {Math.min((page + 1) * size, totalElements)}
-                  </span>{" "}
-                  arası gösteriliyor
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(page - 1)}
-                    disabled={page === 0}
-                    className="transition-all duration-200 hover:bg-blue-100 hover:text-blue-700"
-                  >
-                    Önceki
-                  </Button>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                      Sayfa
-                    </span>
-                    <Badge
-                      variant="outline"
-                      className="border-blue-200 bg-blue-50 px-3 py-1 text-blue-700 dark:border-blue-900 dark:bg-blue-900/30 dark:text-blue-200"
-                    >
-                      {page + 1} / {totalPages}
-                    </Badge>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(page + 1)}
-                    disabled={page >= totalPages - 1}
-                    className="transition-all duration-200 hover:bg-blue-100 hover:text-blue-700"
-                  >
-                    Sonraki
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <PaginationBar
+          page={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
 
         {/* Delete Confirmation Modal */}
         <DeleteModal />

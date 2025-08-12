@@ -13,6 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ArrowLeft, Wrench, Loader2, Upload, X } from "lucide-react";
+import LoaderDots from "@/components/ui/loader-dots";
 import { useUpdateService, useServiceById } from "@/hooks/use-service";
 import { useState, useEffect, useRef } from "react";
 import type { ServiceRequest } from "@/types/service.types";
@@ -94,31 +95,7 @@ export default function ServiceEditPage() {
   if (isLoadingService) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-fade-in text-center">
-          <div className="relative">
-            <div className="mx-auto h-16 w-16 animate-pulse rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 p-4 dark:from-emerald-900 dark:to-teal-900">
-              <Wrench className="h-8 w-8 text-emerald-600 dark:text-emerald-300" />
-            </div>
-            <div className="absolute -inset-2 animate-ping rounded-xl bg-gradient-to-br from-emerald-200 to-teal-200 opacity-50 dark:from-emerald-800 dark:to-teal-800"></div>
-          </div>
-          <p className="mt-6 text-xl font-medium text-gray-700 dark:text-gray-300">
-            Hizmet yükleniyor...
-          </p>
-          <div className="mt-4 flex justify-center space-x-2">
-            <div
-              className="h-2 w-2 animate-bounce rounded-full bg-emerald-500"
-              style={{ animationDelay: "0ms" }}
-            ></div>
-            <div
-              className="h-2 w-2 animate-bounce rounded-full bg-teal-500"
-              style={{ animationDelay: "150ms" }}
-            ></div>
-            <div
-              className="h-2 w-2 animate-bounce rounded-full bg-blue-500"
-              style={{ animationDelay: "300ms" }}
-            ></div>
-          </div>
-        </div>
+        <LoaderDots message="Hizmet yükleniyor..." />
       </div>
     );
   }

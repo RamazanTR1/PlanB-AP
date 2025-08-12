@@ -31,7 +31,7 @@ export default function PortfolioCreatePage() {
     watch,
     formState: { errors, isValid },
   } = useForm<CreatePortfolioFormData>({
-    resolver: zodResolver(createPortfolioSchema) as any,
+    resolver: zodResolver(createPortfolioSchema) as never,
     mode: "onChange",
     defaultValues: {
       title: "",
@@ -43,27 +43,29 @@ export default function PortfolioCreatePage() {
   });
 
   const [coverIndex, setCoverIndex] = useState<number>(0);
-  const watchFiles = watch("files") as unknown as FileList | undefined;
-
-  const filesRegister = register("files");
+  const filesField = register("assets");
+  const watchFiles = watch("assets") as unknown as FileList | undefined;
 
   const onSubmit = async (data: CreatePortfolioFormData) => {
-    const files = (data.files as unknown as FileList | undefined) ?? undefined;
+    const files = watchFiles ?? undefined;
     const assetsMeta = files
-      ? Array.from(files).map((_, idx) => ({ isCovered: idx === coverIndex }))
+      ? Array.from(files).map((file, idx) => ({
+          asset: file.name,
+          isCovered: idx === coverIndex,
+        }))
       : [];
 
-    await createMutation.mutateAsync({
+    const body: Omit<CreatePortfolioFormData, "assets"> & {
+      assets?: { asset: string; isCovered: boolean }[];
+    } = {
       title: data.title.trim(),
       description: data.description.trim(),
       excerpt: (data.excerpt || "").trim(),
       outSourceLink: (data.outSourceLink || "").trim(),
       publishDate: toBackendDateTime(data.publishDate),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      assets: assetsMeta as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ...(files ? ({ files } as any) : {}),
-    } as unknown as any);
+      assets: assetsMeta,
+    };
+    await createMutation.mutateAsync(body);
     navigate("/portfolios");
   };
 
@@ -87,11 +89,11 @@ export default function PortfolioCreatePage() {
             Bilgiler
           </CardTitle>
           <CardDescription className="text-gray-600 dark:text-gray-300">
-            Başlık, açıklama ve yayın tarihini girin
+            Portfolio adı, açıklama ve yayın tarihini girin
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 p-6">
-          <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="title">Başlık</Label>
               <Input id="title" placeholder="Başlık" {...register("title")} />
@@ -163,20 +165,25 @@ export default function PortfolioCreatePage() {
                 type="file"
                 accept="image/*"
                 multiple
-                {...filesRegister}
                 onChange={(e) => {
-                  filesRegister.onChange(e);
+                  (
+                    filesField as unknown as {
+                      onChange: (
+                        e: React.ChangeEvent<HTMLInputElement>,
+                      ) => void;
+                    }
+                  ).onChange(e);
                   setCoverIndex(0);
                 }}
               />
 
-              {watchFiles && watchFiles.length > 0 ? (
+              {watchFiles && (watchFiles as FileList).length > 0 ? (
                 <div className="mt-2 rounded-md border border-dashed border-border p-3">
                   <div className="mb-2 text-sm font-medium text-foreground">
                     Kapak görseli seçin
                   </div>
                   <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
-                    {Array.from(watchFiles).map((file, idx) => (
+                    {Array.from(watchFiles as FileList).map((file, idx) => (
                       <label
                         key={idx}
                         className={`flex cursor-pointer items-center justify-between rounded-md border p-2 text-sm transition-colors ${

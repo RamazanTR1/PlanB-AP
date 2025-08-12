@@ -1,7 +1,7 @@
 import type { Page } from "./user.types";
 
-interface Asset {
-  asset?: string;
+export interface Asset {
+  asset: string;
   isCovered: boolean;
 }
 

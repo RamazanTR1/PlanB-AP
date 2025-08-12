@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { CalendarDays, Loader2, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toBackendDateTime } from "@/utils/date";
+import type { PortfolioRequest } from "@/types/portfolio.types";
 
 export default function PortfolioEditPage() {
   const navigate = useNavigate();
@@ -35,13 +36,13 @@ export default function PortfolioEditPage() {
     watch,
     formState: { errors, isValid },
   } = useForm<UpdatePortfolioFormData>({
-    resolver: zodResolver(updatePortfolioSchema) as any,
+    resolver: zodResolver(updatePortfolioSchema) as never,
     mode: "onChange",
   });
 
   const [coverIndex, setCoverIndex] = useState<number>(0);
-  const filesRegister = register("files");
-  const watchFiles = watch("files") as unknown as FileList | undefined;
+  const filesRegister = register("assets");
+  const watchFiles = watch("assets") as FileList | undefined;
 
   useEffect(() => {
     if (data) {
@@ -50,7 +51,7 @@ export default function PortfolioEditPage() {
         data.assets?.findIndex((asset) => asset.isCovered) ?? 0;
       setCoverIndex(existingCoverIdx >= 0 ? existingCoverIdx : 0);
       reset({
-        title: data.title,
+        title: data.title as unknown as string,
         description: data.description,
         excerpt: data.excerpt,
         outSourceLink: data.outSourceLink,
@@ -60,7 +61,7 @@ export default function PortfolioEditPage() {
   }, [data, reset]);
 
   const onSubmit = async (form: UpdatePortfolioFormData) => {
-    const files = (form.files as unknown as FileList | undefined) ?? undefined;
+    const files = (watchFiles as FileList | undefined) ?? undefined;
 
     // If user selected new files, build assets meta for them; else preserve current cover distribution
     const assetsMeta = files
@@ -69,17 +70,20 @@ export default function PortfolioEditPage() {
           isCovered: idx === coverIndex,
         }));
 
-    await updateMutation.mutateAsync({
-      title: form.title.trim(),
+    const body = {
+      title: (form.title as unknown as string).trim(),
       description: form.description.trim(),
       excerpt: (form.excerpt || "").trim(),
       outSourceLink: (form.outSourceLink || "").trim(),
       publishDate: toBackendDateTime(form.publishDate),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      assets: assetsMeta as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ...(files ? ({ files } as any) : {}),
-    } as unknown as any);
+      assets: assetsMeta,
+    };
+    if (files)
+      body.assets = Array.from(files).map((file, idx) => ({
+        asset: file,
+        isCovered: idx === coverIndex,
+      }));
+    await updateMutation.mutateAsync(body as PortfolioRequest);
     navigate(-1);
   };
 
@@ -104,7 +108,7 @@ export default function PortfolioEditPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 p-6">
-          <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="title">Başlık</Label>
               <Input id="title" placeholder="Başlık" {...register("title")} />

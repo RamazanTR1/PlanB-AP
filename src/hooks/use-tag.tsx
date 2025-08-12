@@ -1,4 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuthQuery } from "./use-auth-query";
 import {
   getTagList,
   getTagById,
@@ -15,7 +16,7 @@ export const useTagList = (
   size: number,
   sort: string,
 ) => {
-  return useQuery({
+  return useAuthQuery({
     queryKey: ["tag-list", search, page, size, sort],
     queryFn: () => getTagList(search, page, size, sort),
     staleTime: 2 * 60 * 1000,
@@ -23,7 +24,7 @@ export const useTagList = (
 };
 
 export const useTagById = (id: number) => {
-  return useQuery({
+  return useAuthQuery({
     queryKey: ["tag-by-id", id],
     queryFn: () => getTagById(id),
     staleTime: 10 * 60 * 1000,

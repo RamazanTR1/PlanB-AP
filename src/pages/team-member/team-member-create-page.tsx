@@ -37,6 +37,7 @@ import {
   Globe,
 } from "lucide-react";
 import { useCreateTeamMember } from "@/hooks/use-team-member";
+import type { TeamMemberRequest } from "@/types/team-member-types";
 import {
   teamMemberSchema,
   type TeamMemberFormData,
@@ -105,21 +106,15 @@ export default function TeamMemberCreatePage() {
 
   const onSubmit = async (data: TeamMemberFormData) => {
     try {
-      const formData = new FormData();
-      formData.append("name", data.name);
-      formData.append("title", data.title);
-      formData.append("quote", data.quote);
-      formData.append("orderNumber", data.orderNumber.toString());
-
-      if (data.linkedinUrl && data.linkedinUrl.trim()) {
-        formData.append("linkedinUrl", data.linkedinUrl);
-      }
-
-      if (data.profilePhoto) {
-        formData.append("profilePhoto", data.profilePhoto);
-      }
-
-      await createTeamMemberMutation.mutateAsync(formData as any);
+      const request: TeamMemberRequest = {
+        name: data.name,
+        title: data.title,
+        quote: data.quote,
+        orderNumber: data.orderNumber,
+        linkedinUrl: data.linkedinUrl || null,
+        profilePhoto: data.profilePhoto || null,
+      };
+      await createTeamMemberMutation.mutateAsync(request);
       navigate("/team-members");
     } catch (error) {
       console.error("Takım üyesi oluşturulurken hata:", error);

@@ -14,7 +14,7 @@ export interface TeamMemberRequest {
   name: string;
   title: string;
   quote: string;
-  linkedinUrl: string; //Optional
+  linkedinUrl: string | null; //Optional
   orderNumber: number; // int32 equivalent
   profilePhoto: File | null; //Optional
 }

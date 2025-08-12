@@ -129,21 +129,16 @@ export default function TeamMemberEditPage() {
   };
 
   const onSubmit = async (data: TeamMemberFormData) => {
-    const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("title", data.title);
-    formData.append("quote", data.quote);
-    formData.append("orderNumber", data.orderNumber.toString());
+    const request = {
+      name: data.name,
+      title: data.title,
+      quote: data.quote,
+      orderNumber: data.orderNumber,
+      linkedinUrl: data.linkedinUrl || "",
+      profilePhoto: data.profilePhoto,
+    };
 
-    if (data.linkedinUrl && data.linkedinUrl.trim()) {
-      formData.append("linkedinUrl", data.linkedinUrl);
-    }
-
-    if (data.profilePhoto) {
-      formData.append("profilePhoto", data.profilePhoto);
-    }
-
-    updateTeamMemberMutation.mutate(formData as any, {
+    updateTeamMemberMutation.mutate(request as unknown as never, {
       onSuccess: () => {
         navigate("/team-members");
       },

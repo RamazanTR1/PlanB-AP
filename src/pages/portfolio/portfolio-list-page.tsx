@@ -17,7 +17,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { MultiSelect } from "@/components/multi-select";
 import {
   DropdownMenu,
@@ -25,24 +24,25 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useDeleteConfirmation } from "@/components/confirm-delete";
+import { useDeleteConfirmation } from "@/hooks/use-delete-confirmation";
 import { useNavigate } from "react-router-dom";
 import {
   usePortfolioList,
   useDeletePortfolioById,
 } from "@/hooks/use-portfolio";
 import type { Portfolio } from "@/types/portfolio.types";
+import PaginationBar from "@/components/pagination";
 import {
   CalendarDays,
   ChevronDown,
   Eye,
   Filter,
-  Loader2,
   Pencil,
   Plus,
   Trash2,
   Search,
 } from "lucide-react";
+import LoaderDots from "@/components/ui/loader-dots";
 
 const sortOptions = [
   { label: "Yayın Tarihi (Yeni)", value: "publishDate,desc" },
@@ -177,7 +177,7 @@ export default function PortfolioListPage() {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                 <Input
                   placeholder="Portfolyo ara..."
-                  className="pl-10 transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-none"
+                  className="pl-10 focus:border-transparent focus:pl-4 dark:border-none"
                   value={searchInput}
                   onChange={(e) => {
                     setSearchInput(e.target.value);
@@ -236,17 +236,7 @@ export default function PortfolioListPage() {
           </CardHeader>
           <CardContent className="p-6">
             {isLoading ? (
-              <div className="flex h-64 items-center justify-center">
-                <div className="animate-fade-in text-center">
-                  <div className="relative">
-                    <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
-                    <div className="absolute inset-0 h-12 w-12 animate-pulse rounded-full border-4 border-blue-200"></div>
-                  </div>
-                  <p className="mt-4 font-medium text-gray-600 dark:text-gray-300">
-                    Portfolyolar yükleniyor...
-                  </p>
-                </div>
-              </div>
+              <LoaderDots message="Portfolyolar yükleniyor..." />
             ) : items.length === 0 ? (
               <div className="flex h-64 items-center justify-center">
                 <div className="animate-fade-in text-center">
@@ -351,60 +341,11 @@ export default function PortfolioListPage() {
           </CardContent>
         </Card>
 
-        {totalElements > 0 && (
-          <Card className="animate-fade-in border-0 bg-white/80 shadow-lg backdrop-blur-sm dark:bg-gray-800/80">
-            <CardContent className="p-6">
-              <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
-                <div className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                  Toplam{" "}
-                  <span className="font-semibold text-blue-600">
-                    {totalElements}
-                  </span>{" "}
-                  öğeden{" "}
-                  <span className="font-semibold text-blue-600">
-                    {page * size + 1}
-                  </span>{" "}
-                  -{" "}
-                  <span className="font-semibold text-blue-600">
-                    {Math.min((page + 1) * size, totalElements)}
-                  </span>{" "}
-                  arası gösteriliyor
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage(page - 1)}
-                    disabled={page <= 0}
-                    className="text-gray-700 transition-all duration-200 hover:border-blue-300 hover:bg-blue-50 disabled:opacity-50 dark:border-none dark:text-gray-200"
-                  >
-                    Önceki
-                  </Button>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                      Sayfa
-                    </span>
-                    <Badge
-                      variant="outline"
-                      className="border-blue-200 bg-blue-50 px-3 py-1 text-blue-700 dark:border-blue-900 dark:bg-blue-900/30 dark:text-blue-200"
-                    >
-                      {page + 1} / {totalPages}
-                    </Badge>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage(page + 1)}
-                    disabled={page >= totalPages - 1}
-                    className="text-gray-700 transition-all duration-200 hover:border-blue-300 hover:bg-blue-50 disabled:opacity-50 dark:border-none dark:text-gray-200"
-                  >
-                    Sonraki
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <PaginationBar
+          page={page}
+          totalPages={totalPages}
+          onPageChange={(p) => setPage(p)}
+        />
       </div>
 
       <DeleteModal />

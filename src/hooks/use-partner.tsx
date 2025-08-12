@@ -1,4 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuthQuery } from "./use-auth-query";
 import {
   getPartnerList,
   getPartnerById,
@@ -10,7 +11,7 @@ import type { PartnerRequest } from "@/types/partner.types";
 import { toast } from "sonner";
 
 export const usePartnerList = () => {
-  return useQuery({
+  return useAuthQuery({
     queryKey: ["partner-list"],
     queryFn: () => getPartnerList(),
     staleTime: 2 * 60 * 1000,
@@ -18,7 +19,7 @@ export const usePartnerList = () => {
 };
 
 export const usePartnerById = (partnerId: number) => {
-  return useQuery({
+  return useAuthQuery({
     queryKey: ["partner-by-id", partnerId],
     queryFn: () => getPartnerById(partnerId),
     staleTime: 10 * 60 * 1000,

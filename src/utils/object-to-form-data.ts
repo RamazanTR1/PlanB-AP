@@ -17,6 +17,11 @@ export function objectToFormData<
         value.every((v) => v instanceof File)
       ) {
         (value as File[]).forEach((file) => formData.append(key, file));
+      } else if (Array.isArray(value)) {
+        // Handle arrays like tagIds
+        value.forEach((item, index) => {
+          formData.append(`${key}[${index}]`, String(item));
+        });
       } else if (typeof value === "object") {
         formData.append(key, JSON.stringify(value));
       } else {

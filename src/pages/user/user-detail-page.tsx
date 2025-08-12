@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import LoaderDots from "@/components/ui/loader-dots";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,29 +24,7 @@ export default function UserDetailPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-fade-in text-center">
-          <div className="relative">
-            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-black"></div>
-            <div className="absolute inset-0 animate-ping rounded-full border-4 border-transparent border-t-gray-400"></div>
-          </div>
-          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-            Kullanıcı yükleniyor...
-          </p>
-          <div className="mt-4 flex justify-center space-x-1">
-            <div
-              className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
-              style={{ animationDelay: "0ms" }}
-            ></div>
-            <div
-              className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
-              style={{ animationDelay: "150ms" }}
-            ></div>
-            <div
-              className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
-              style={{ animationDelay: "300ms" }}
-            ></div>
-          </div>
-        </div>
+        <LoaderDots message="Kullanıcı yükleniyor..." />
       </div>
     );
   }

@@ -27,6 +27,11 @@ import PortfolioListPage from "./pages/portfolio/portfolio-list-page";
 import PortfolioCreatePage from "./pages/portfolio/portfolio-create-page";
 import PortfolioEditPage from "./pages/portfolio/portfolio-edit-page";
 import PortfolioDetailPage from "./pages/portfolio/portfolio-detail-page";
+import SettingsEditPage from "./pages/settings/settings-edit-page";
+import SliderListPage from "./pages/slider/slider-list-page";
+import SliderCreatePage from "./pages/slider/slider-create-page";
+import SliderEditPage from "./pages/slider/slider-edit-page";
+import SliderDetailPage from "./pages/slider/slider-detail-page";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +92,11 @@ export default function App() {
                   path="/portfolios/:id"
                   element={<PortfolioDetailPage />}
                 />
+                <Route path="/sliders" element={<SliderListPage />} />
+                <Route path="/sliders/create" element={<SliderCreatePage />} />
+                <Route path="/sliders/edit/:id" element={<SliderEditPage />} />
+                <Route path="/sliders/:id" element={<SliderDetailPage />} />
+                <Route path="/settings" element={<SettingsEditPage />} />
               </Route>
             </Route>
             <Route path="/login" element={<LoginPage />} />

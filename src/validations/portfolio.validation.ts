@@ -32,7 +32,9 @@ export const createPortfolioSchema = z.object({
   excerpt: portfolioBaseSchema.excerpt,
   outSourceLink: portfolioBaseSchema.outSourceLink.optional().or(z.literal("")),
   publishDate: portfolioBaseSchema.publishDate,
-  files: z.any().optional(),
+  assets: z
+    .array(z.object({ asset: z.string(), isCovered: z.boolean() }))
+    .optional(),
 });
 
 export const updatePortfolioSchema = z.object({
@@ -41,7 +43,9 @@ export const updatePortfolioSchema = z.object({
   excerpt: portfolioBaseSchema.excerpt,
   outSourceLink: portfolioBaseSchema.outSourceLink.optional().or(z.literal("")),
   publishDate: portfolioBaseSchema.publishDate,
-  files: z.any().optional(),
+  assets: z
+    .array(z.object({ asset: z.string(), isCovered: z.boolean() }))
+    .optional(),
 });
 
 export type CreatePortfolioFormData = z.infer<typeof createPortfolioSchema>;

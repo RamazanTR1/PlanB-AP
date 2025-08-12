@@ -12,7 +12,7 @@ import {
   Eye,
 } from "lucide-react";
 import { useServiceById, useDeleteServiceById } from "@/hooks/use-service";
-import { useDeleteConfirmation } from "@/components/confirm-delete";
+import { useDeleteConfirmation } from "@/hooks/use-delete-confirmation";
 
 export default function ServiceDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -25,7 +25,7 @@ export default function ServiceDetailPage() {
 
   const handleDelete = () => {
     openDeleteModal({
-      entityType: "service" as any,
+      entityType: "hizmet",
       title: "Hizmeti Sil",
       description: `"${service?.name}" hizmetini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`,
       onConfirm: () => {

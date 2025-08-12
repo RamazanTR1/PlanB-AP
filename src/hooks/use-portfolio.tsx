@@ -1,4 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuthQuery } from "./use-auth-query";
 import {
   getPortfolioList,
   getPortfolioById,
@@ -15,7 +16,7 @@ export const usePortfolioList = (
   sort: string,
   search: string,
 ) => {
-  return useQuery({
+  return useAuthQuery({
     queryKey: ["portfolio-list", page, size, sort, search],
     queryFn: () => getPortfolioList(page, size, sort, search),
     staleTime: 2 * 60 * 1000,
@@ -23,7 +24,7 @@ export const usePortfolioList = (
 };
 
 export const usePortfolioById = (id: number) => {
-  return useQuery({
+  return useAuthQuery({
     queryKey: ["portfolio-by-id", id],
     queryFn: () => getPortfolioById(id),
     staleTime: 10 * 60 * 1000,
