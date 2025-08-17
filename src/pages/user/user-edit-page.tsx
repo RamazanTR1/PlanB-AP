@@ -389,7 +389,7 @@ export default function UserEditPage() {
                 <Button
                   type="submit"
                   disabled={updateUserMutation.isPending}
-                  className="transform bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl"
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white transition-all duration-200 hover:scale-105 hover:from-emerald-700 hover:to-teal-700"
                 >
                   {updateUserMutation.isPending ? (
                     <>

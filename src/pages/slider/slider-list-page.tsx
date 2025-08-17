@@ -26,7 +26,7 @@ import {
   Filter,
   Search,
   Plus,
-  Pencil,
+  Edit,
   Trash2,
   ChevronDown,
 } from "lucide-react";
@@ -179,7 +179,7 @@ export default function SliderListPage() {
               </div>
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {filtered.map((s, index) => (
                 <Card
                   key={s.id}
@@ -189,7 +189,7 @@ export default function SliderListPage() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-medium text-white">
+                        <div className="flex size-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-medium text-white">
                           {s.image ? (
                             <img
                               src={s.image}
@@ -216,7 +216,7 @@ export default function SliderListPage() {
                           onClick={() => navigate(`/sliders/edit/${s.id}`)}
                           className="transition-all duration-200 hover:bg-green-100 hover:text-green-700"
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Edit className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"

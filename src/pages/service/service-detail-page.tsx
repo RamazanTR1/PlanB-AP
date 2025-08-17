@@ -21,20 +21,19 @@ export default function ServiceDetailPage() {
 
   const { data: service, isLoading, error } = useServiceById(serviceId);
   const deleteServiceMutation = useDeleteServiceById();
-  const { openDeleteModal } = useDeleteConfirmation();
+  const { openDeleteModal, DeleteModal } = useDeleteConfirmation();
 
   const handleDelete = () => {
     openDeleteModal({
       entityType: "hizmet",
-      title: "Hizmeti Sil",
-      description: `"${service?.name}" hizmetini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`,
-      onConfirm: () => {
-        deleteServiceMutation.mutate(serviceId, {
-          onSuccess: () => {
-            navigate("/services");
-          },
-        });
+      entityName: service?.name,
+      requireTextConfirmation: true,
+      confirmationText: service?.name,
+      onConfirm: async () => {
+        await deleteServiceMutation.mutateAsync(serviceId);
+        navigate("/services");
       },
+      isLoading: deleteServiceMutation.isPending,
     });
   };
 
@@ -140,7 +139,7 @@ export default function ServiceDetailPage() {
               variant="outline"
               size="sm"
               onClick={() => navigate("/services")}
-              className="flex items-center justify-center gap-2 border-gray-200 bg-white/90 text-gray-700 shadow-sm transition-all duration-200 hover:scale-105 dark:border-gray-600 dark:bg-gray-800/90 dark:text-gray-200"
+              className="flex items-center justify-center gap-2 border-gray-200 bg-white/90 text-gray-700 shadow-sm transition-all duration-200 hover:scale-105 dark:border-gray-600 dark:bg-gray-700/90 dark:text-gray-200"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Geri</span>
@@ -195,10 +194,6 @@ export default function ServiceDetailPage() {
                     {service.name}
                   </h1>
                 </div>
-                <div className="mb-3 flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                  <Info className="h-4 w-4 flex-shrink-0" />
-                  <p className="text-base md:text-lg">{service.description}</p>
-                </div>
                 {/* Status Badge */}
                 <div>
                   <span className="inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
@@ -214,7 +209,7 @@ export default function ServiceDetailPage() {
               <Button
                 onClick={() => navigate(`/services/edit/${serviceId}`)}
                 variant="outline"
-                className="flex flex-1 items-center justify-center gap-2 border-gray-200 bg-white/90 text-gray-700 shadow-sm transition-all duration-200 hover:scale-105 dark:border-none dark:bg-gray-800/90 dark:text-gray-200 md:flex-none"
+                className="flex flex-1 items-center justify-center gap-2 border-gray-200 bg-white/90 text-gray-700 shadow-sm transition-all duration-200 hover:scale-105 dark:border-none dark:bg-gray-700/80 dark:text-gray-200 md:flex-none"
               >
                 <Edit className="h-4 w-4" />
                 <span className="hidden sm:inline">Düzenle</span>
@@ -291,6 +286,7 @@ export default function ServiceDetailPage() {
           </CardContent>
         </Card>
       </div>
+      <DeleteModal />
     </div>
   );
 }

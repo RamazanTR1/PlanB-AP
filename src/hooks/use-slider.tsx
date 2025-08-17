@@ -29,8 +29,8 @@ export const useSliderById = (id: number) => {
 export const useCreateSlider = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<Slider, Error, SliderRequest>({
-    mutationFn: (slider) => createSlider(slider),
+  return useMutation({
+    mutationFn: (slider: SliderRequest) => createSlider(slider),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["slider-list"] });
       toast.success("Slider başarıyla oluşturuldu");

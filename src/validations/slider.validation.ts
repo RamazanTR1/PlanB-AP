@@ -13,10 +13,9 @@ export const sliderSchema = z.object({
     .max(1000, "Açıklama en fazla 1000 karakter olabilir"),
   excerpt: z
     .string()
-    .trim()
-    .max(300, "Özet en fazla 300 karakter olabilir")
     .optional()
-    .default(""),
+    .transform((val) => val?.trim() || "")
+    .pipe(z.string().max(300, "Özet en fazla 300 karakter olabilir")),
   tagIds: z.array(z.number()).min(0).default([]),
   image: z.instanceof(File).optional().or(z.null()).default(null),
 });

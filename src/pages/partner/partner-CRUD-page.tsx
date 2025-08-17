@@ -101,6 +101,8 @@ export default function PartnerCRUDPage() {
       openDeleteModal({
         entityType: "partner",
         entityName: partner.name,
+        requireTextConfirmation: true,
+        confirmationText: partner.name,
         onConfirm: async () => {
           await deletePartnerMutation.mutateAsync(partner.id);
         },
@@ -295,12 +297,12 @@ export default function PartnerCRUDPage() {
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center space-x-3">
-                          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-medium text-white">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full from-blue-500 to-indigo-600/70 text-sm font-medium text-white dark:bg-gradient-to-br">
                             {partner.icon ? (
                               <img
                                 src={partner.icon}
                                 alt={partner.name}
-                                className="h-full w-full object-cover"
+                                className="h-full w-full object-contain"
                                 onError={(e) => {
                                   (e.target as HTMLImageElement).style.display =
                                     "none";

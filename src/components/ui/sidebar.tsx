@@ -105,7 +105,7 @@ const sidebarCategories: SidebarCategory[] = [
         icon: Bell,
       },
       {
-        title: "Bildirim Aboneleri",
+        title: "Bildirim Abonelikleri",
         href: "/notification-subscribers",
         icon: BellRing,
       },

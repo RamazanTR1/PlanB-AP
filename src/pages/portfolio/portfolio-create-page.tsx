@@ -20,6 +20,7 @@ import {
 } from "@/validations/portfolio.validation";
 import { toBackendDateTime } from "@/utils/date";
 import { useState } from "react";
+import type { PortfolioRequest } from "@/types/portfolio.types";
 
 export default function PortfolioCreatePage() {
   const navigate = useNavigate();
@@ -29,12 +30,13 @@ export default function PortfolioCreatePage() {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isValid },
   } = useForm<CreatePortfolioFormData>({
     resolver: zodResolver(createPortfolioSchema) as never,
     mode: "onChange",
     defaultValues: {
-      title: "",
+      name: "",
       description: "",
       excerpt: "",
       outSourceLink: "",
@@ -43,29 +45,29 @@ export default function PortfolioCreatePage() {
   });
 
   const [coverIndex, setCoverIndex] = useState<number>(0);
-  const filesField = register("assets");
-  const watchFiles = watch("assets") as unknown as FileList | undefined;
+  const watchFiles = watch("assets") as FileList | undefined;
 
   const onSubmit = async (data: CreatePortfolioFormData) => {
+    console.log(data);
     const files = watchFiles ?? undefined;
-    const assetsMeta = files
-      ? Array.from(files).map((file, idx) => ({
-          asset: file.name,
-          isCovered: idx === coverIndex,
-        }))
-      : [];
 
-    const body: Omit<CreatePortfolioFormData, "assets"> & {
-      assets?: { asset: string; isCovered: boolean }[];
-    } = {
-      title: data.title.trim(),
+    // PortfolioRequest objesi oluştur
+    const request: PortfolioRequest = {
+      name: data.name.trim(),
       description: data.description.trim(),
       excerpt: (data.excerpt || "").trim(),
       outSourceLink: (data.outSourceLink || "").trim(),
       publishDate: toBackendDateTime(data.publishDate),
-      assets: assetsMeta,
+      assets:
+        files && files.length > 0
+          ? Array.from(files).map((file, index) => ({
+              asset: file.name,
+              isCovered: index === coverIndex,
+            }))
+          : undefined,
     };
-    await createMutation.mutateAsync(body);
+
+    await createMutation.mutateAsync(request);
     navigate("/portfolios");
   };
 
@@ -95,10 +97,10 @@ export default function PortfolioCreatePage() {
         <CardContent className="space-y-4 p-6">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="title">Başlık</Label>
-              <Input id="title" placeholder="Başlık" {...register("title")} />
-              {errors.title && (
-                <p className="text-sm text-red-500">{errors.title.message}</p>
+              <Label htmlFor="name">Başlık</Label>
+              <Input id="name" placeholder="Başlık" {...register("name")} />
+              {errors.name && (
+                <p className="text-sm text-red-500">{errors.name.message}</p>
               )}
             </div>
 
@@ -166,14 +168,11 @@ export default function PortfolioCreatePage() {
                 accept="image/*"
                 multiple
                 onChange={(e) => {
-                  (
-                    filesField as unknown as {
-                      onChange: (
-                        e: React.ChangeEvent<HTMLInputElement>,
-                      ) => void;
-                    }
-                  ).onChange(e);
-                  setCoverIndex(0);
+                  const files = e.target.files;
+                  if (files) {
+                    setValue("assets", files);
+                    setCoverIndex(0);
+                  }
                 }}
               />
 

@@ -34,6 +34,7 @@ export default function PortfolioEditPage() {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors, isValid },
   } = useForm<UpdatePortfolioFormData>({
     resolver: zodResolver(updatePortfolioSchema) as never,
@@ -41,7 +42,6 @@ export default function PortfolioEditPage() {
   });
 
   const [coverIndex, setCoverIndex] = useState<number>(0);
-  const filesRegister = register("assets");
   const watchFiles = watch("assets") as FileList | undefined;
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function PortfolioEditPage() {
         data.assets?.findIndex((asset) => asset.isCovered) ?? 0;
       setCoverIndex(existingCoverIdx >= 0 ? existingCoverIdx : 0);
       reset({
-        title: data.title as unknown as string,
+        name: data.name as unknown as string,
         description: data.description,
         excerpt: data.excerpt,
         outSourceLink: data.outSourceLink,
@@ -63,27 +63,28 @@ export default function PortfolioEditPage() {
   const onSubmit = async (form: UpdatePortfolioFormData) => {
     const files = (watchFiles as FileList | undefined) ?? undefined;
 
-    // If user selected new files, build assets meta for them; else preserve current cover distribution
-    const assetsMeta = files
-      ? Array.from(files).map((_, idx) => ({ isCovered: idx === coverIndex }))
-      : (data?.assets || []).map((_, idx) => ({
-          isCovered: idx === coverIndex,
-        }));
-
-    const body = {
-      title: (form.title as unknown as string).trim(),
+    // PortfolioRequest objesi oluştur
+    const request: PortfolioRequest = {
+      name: (form.name as unknown as string).trim(),
       description: form.description.trim(),
       excerpt: (form.excerpt || "").trim(),
       outSourceLink: (form.outSourceLink || "").trim(),
       publishDate: toBackendDateTime(form.publishDate),
-      assets: assetsMeta,
+      assets:
+        files && files.length > 0
+          ? Array.from(files).map((file, index) => ({
+              asset: file.name,
+              isCovered: index === coverIndex,
+            }))
+          : data?.assets && data.assets.length > 0
+            ? data.assets.map((asset, index) => ({
+                asset: asset.asset,
+                isCovered: index === coverIndex,
+              }))
+            : undefined,
     };
-    if (files)
-      body.assets = Array.from(files).map((file, idx) => ({
-        asset: file,
-        isCovered: idx === coverIndex,
-      }));
-    await updateMutation.mutateAsync(body as PortfolioRequest);
+
+    await updateMutation.mutateAsync(request);
     navigate(-1);
   };
 
@@ -110,10 +111,10 @@ export default function PortfolioEditPage() {
         <CardContent className="space-y-4 p-6">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="title">Başlık</Label>
-              <Input id="title" placeholder="Başlık" {...register("title")} />
-              {errors.title && (
-                <p className="text-sm text-red-500">{errors.title.message}</p>
+              <Label htmlFor="name">Başlık</Label>
+              <Input id="name" placeholder="Başlık" {...register("name")} />
+              {errors.name && (
+                <p className="text-sm text-red-500">{errors.name.message}</p>
               )}
             </div>
 
@@ -180,10 +181,12 @@ export default function PortfolioEditPage() {
                 type="file"
                 accept="image/*"
                 multiple
-                {...filesRegister}
                 onChange={(e) => {
-                  filesRegister.onChange(e);
-                  setCoverIndex(0);
+                  const files = e.target.files;
+                  if (files) {
+                    setValue("assets", files);
+                    setCoverIndex(0);
+                  }
                 }}
               />
 

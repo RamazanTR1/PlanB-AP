@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const portfolioBaseSchema = {
-  title: z
+  name: z
     .string()
     .trim()
     .min(3, "Başlık en az 3 karakter olmalı")
@@ -27,25 +27,21 @@ export const portfolioBaseSchema = {
 };
 
 export const createPortfolioSchema = z.object({
-  title: portfolioBaseSchema.title,
+  name: portfolioBaseSchema.name,
   description: portfolioBaseSchema.description,
   excerpt: portfolioBaseSchema.excerpt,
   outSourceLink: portfolioBaseSchema.outSourceLink.optional().or(z.literal("")),
   publishDate: portfolioBaseSchema.publishDate,
-  assets: z
-    .array(z.object({ asset: z.string(), isCovered: z.boolean() }))
-    .optional(),
+  assets: z.any().optional(), // FileList için any kullanıyoruz
 });
 
 export const updatePortfolioSchema = z.object({
-  title: portfolioBaseSchema.title,
+  name: portfolioBaseSchema.name,
   description: portfolioBaseSchema.description,
   excerpt: portfolioBaseSchema.excerpt,
   outSourceLink: portfolioBaseSchema.outSourceLink.optional().or(z.literal("")),
   publishDate: portfolioBaseSchema.publishDate,
-  assets: z
-    .array(z.object({ asset: z.string(), isCovered: z.boolean() }))
-    .optional(),
+  assets: z.any().optional(), // FileList için any kullanıyoruz
 });
 
 export type CreatePortfolioFormData = z.infer<typeof createPortfolioSchema>;

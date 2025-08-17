@@ -1,8 +1,8 @@
 import { fetchClient } from "@/utils/fetch-client";
 import type {
-  PortfolioRequest,
   PortfolioList,
   Portfolio,
+  PortfolioRequest,
 } from "@/types/portfolio.types";
 
 export const getPortfolioList = async (

@@ -6,7 +6,7 @@ export interface Asset {
 }
 
 export interface PortfolioRequest {
-  title: string;
+  name: string;
   description: string;
   excerpt: string;
   outSourceLink?: string; // optional
@@ -16,7 +16,7 @@ export interface PortfolioRequest {
 
 export interface Portfolio {
   id: number;
-  title: string;
+  name: string;
   description: string;
   excerpt: string;
   outSourceLink?: string;

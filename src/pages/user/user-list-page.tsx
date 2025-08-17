@@ -88,6 +88,8 @@ export default function UserListPage() {
       openDeleteModal({
         entityType: "kullanıcı",
         entityName: user.username,
+        requireTextConfirmation: true,
+        confirmationText: user.username,
         onConfirm: async () => {
           await deleteUserMutation.mutateAsync(user.id);
         },

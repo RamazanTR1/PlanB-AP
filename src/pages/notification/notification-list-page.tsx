@@ -1,7 +1,5 @@
-// src/pages/service/service-list-page.tsx
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDebounce } from "use-debounce";
 import {
   Card,
   CardContent,
@@ -10,8 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-// removed unused Badge import
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -21,17 +18,24 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Search,
   Plus,
   Edit,
   Trash2,
   Eye,
   ChevronDown,
-  Wrench,
+  Bell,
   Loader2,
   Filter,
+  Send,
+  Mail,
+  MessageSquare,
 } from "lucide-react";
-import { useServiceList, useDeleteServiceById } from "@/hooks/use-service";
+import LoaderDots from "@/components/ui/loader-dots";
+import {
+  useNotificationList,
+  useNotificationDelete,
+  useNotificationSend,
+} from "@/hooks/use-notification";
 import { MultiSelect } from "@/components/multi-select";
 import {
   DropdownMenu,
@@ -40,73 +44,81 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useDeleteConfirmation } from "@/hooks/use-delete-confirmation";
-import type { Service } from "@/types/service.types";
+import { useSendConfirmation } from "@/components/confirm-send";
+import type { Notification } from "@/types/notification.types";
 import PaginationBar from "@/components/pagination";
-import LoaderDots from "@/components/ui/loader-dots";
 
 // Sort options for multi-select
 const sortOptions = [
-  { label: "Hizmet Adı (A-Z)", value: "name,asc" },
-  { label: "Hizmet Adı (Z-A)", value: "name,desc" },
-  { label: "Açıklama (A-Z)", value: "description,asc" },
-  { label: "Açıklama (Z-A)", value: "description,desc" },
+  { label: "ID (Azalan)", value: "id,desc" },
+  { label: "ID (Artan)", value: "id,asc" },
+  { label: "Başlık (A-Z)", value: "title,asc" },
+  { label: "Başlık (Z-A)", value: "title,desc" },
+  { label: "Tür (E-posta -> SMS)", value: "type,asc" },
+  { label: "Tür (SMS -> E-posta)", value: "type,desc" },
 ];
 
 // Size options for dropdown
 const sizeOptions = [
+  { label: "5", value: 5 },
   { label: "10", value: 10 },
   { label: "20", value: 20 },
-  { label: "30", value: 30 },
-  { label: "50", value: 50 },
 ];
 
-export default function ServiceListPage() {
+export default function NotificationListPage() {
   const navigate = useNavigate();
-  const [searchInput, setSearchInput] = useState("");
-  const [debouncedSearch] = useDebounce(searchInput, 350);
   const [page, setPage] = useState(0); // 0-indexed for backend
-  const [size, setSize] = useState(10);
-  const [sort, setSort] = useState<string[]>(["name,asc"]);
+  const [size, setSize] = useState(5);
+  const [sort, setSort] = useState<string[]>(["id,desc"]);
 
   const {
-    data: serviceListResponse,
+    data: notificationListResponse,
     isLoading,
     error,
-  } = useServiceList(debouncedSearch, page, size, sort[0] || "name,asc");
-  const deleteServiceMutation = useDeleteServiceById();
+  } = useNotificationList(page, size, sort[0] || "id,desc");
+  const deleteNotificationMutation = useNotificationDelete();
+  const sendNotificationMutation = useNotificationSend();
   const { openDeleteModal, DeleteModal } = useDeleteConfirmation();
+  const { openSendModal, SendModal } = useSendConfirmation();
 
-  const services = serviceListResponse?.content || [];
-  const totalPages = serviceListResponse?.page?.totalPages || 0;
-  const totalElements = serviceListResponse?.page?.totalElements || 0;
+  const notifications = notificationListResponse?.content || [];
+  const totalPages = notificationListResponse?.page?.totalPages || 0;
+  const totalElements = notificationListResponse?.page?.totalElements || 0;
 
   const handleDelete = useCallback(
-    (service: Service) => {
+    (notification: Notification) => {
       openDeleteModal({
-        entityType: "hizmet",
-        entityName: service.name,
-        requireTextConfirmation: true,
-        confirmationText: service.name,
+        entityType: "bildirim",
+        entityName: notification.title,
         onConfirm: async () => {
-          await deleteServiceMutation.mutateAsync(service.id);
+          await deleteNotificationMutation.mutateAsync(notification.id);
         },
-        isLoading: deleteServiceMutation.isPending,
+        isLoading: deleteNotificationMutation.isPending,
       });
     },
-    [openDeleteModal, deleteServiceMutation],
+    [openDeleteModal, deleteNotificationMutation],
   );
 
-  const handleViewService = useCallback(
-    (serviceId: number) => {
-      navigate(`/services/${serviceId}`);
+  const handleSend = useCallback(
+    (notification: Notification) => {
+      openSendModal({
+        onConfirm: async () => {
+          await sendNotificationMutation.mutateAsync(notification.id);
+        },
+        notificationTitle: notification.title,
+        notificationType: notification.type,
+        isLoading: sendNotificationMutation.isPending,
+      });
+    },
+    [openSendModal, sendNotificationMutation],
+  );
+
+  const handleViewNotification = useCallback(
+    (notificationId: number) => {
+      navigate(`/notifications/${notificationId}`);
     },
     [navigate],
   );
-
-  const handleSearch = useCallback((value: string) => {
-    setSearchInput(value);
-    setPage(0); // Reset to first page when searching (0-indexed)
-  }, []);
 
   const handleSortChange = useCallback((values: string[]) => {
     setSort(values);
@@ -118,19 +130,33 @@ export default function ServiceListPage() {
     setPage(0); // Reset to first page when changing size
   }, []);
 
+  const getTypeBadge = (type: string) => {
+    return type === "EMAIL" ? (
+      <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200">
+        <Mail className="mr-1 h-3 w-3" />
+        E-posta
+      </Badge>
+    ) : (
+      <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200">
+        <MessageSquare className="mr-1 h-3 w-3" />
+        SMS
+      </Badge>
+    );
+  };
+
   if (error) {
     return (
       <div className="animate-page-fade space-y-6">
         <div className="flex h-64 items-center justify-center">
           <div className="animate-fade-in text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 p-4">
-              <Wrench className="h-8 w-8 text-red-600" />
+              <Bell className="h-8 w-8 text-red-600" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Bir hata oluştu
             </h3>
             <p className="mt-2 text-gray-600 dark:text-gray-300">
-              Hizmet listesi yüklenirken bir sorun oluştu.
+              Bildirim listesi yüklenirken bir sorun oluştu.
             </p>
             <Button
               onClick={() => window.location.reload()}
@@ -151,30 +177,31 @@ export default function ServiceListPage() {
         <div className="animate-slide-up flex items-center justify-between">
           <div>
             <h1 className="flex items-center text-3xl font-bold text-gray-900 dark:text-white">
-              <Wrench className="mr-3 h-8 w-8 text-blue-600" />
-              Hizmetler
+              <Bell className="mr-3 h-8 w-8 text-blue-600" />
+              Bildirimler
             </h1>
             <p className="mt-2 text-gray-600 dark:text-gray-300">
-              Sistem hizmetlerini yönetin ve izleyin ({totalElements} hizmet)
+              Sistem bildirimlerini yönetin ve izleyin ({totalElements}{" "}
+              bildirim)
             </p>
           </div>
           <Button
             className="transform bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl"
-            onClick={() => navigate("/services/create")}
+            onClick={() => navigate("/notifications/create")}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Hizmet Ekle
+            Bildirim Ekle
           </Button>
         </div>
 
-        {/* Search and Filters */}
+        {/* Filters */}
         <Card className="animate-scale-in border-0 bg-white/80 shadow-lg backdrop-blur-sm dark:bg-gray-800/80">
           <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50 dark:border-gray-700 dark:from-gray-700 dark:to-gray-800">
             <CardTitle className="flex items-center text-gray-800 dark:text-white">
               <span className="mr-2 rounded-lg bg-blue-100 p-2 dark:bg-blue-900">
                 <Filter className="h-4 w-4 text-blue-600 dark:text-blue-300" />
               </span>
-              Arama ve Filtreler
+              Filtreler
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">
               <i>Listeyi özelleştirmede tek sınır sizsiniz!</i>
@@ -182,18 +209,8 @@ export default function ServiceListPage() {
           </CardHeader>
           <CardContent className="p-6">
             <div className="flex flex-col items-center space-y-4 md:flex-row md:space-x-4 md:space-y-0">
-              <div className="relative w-full flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-                <Input
-                  placeholder="Hizmet ara..."
-                  className="pl-10 focus:border-transparent focus:pl-4 dark:border-none"
-                  value={searchInput}
-                  onChange={(e) => handleSearch(e.target.value)}
-                />
-              </div>
-
               {/* Sort Multi-Select */}
-              <div className="w-full md:w-auto">
+              <div className="w-full md:w-1/2">
                 <MultiSelect
                   options={sortOptions}
                   onValueChange={handleSortChange}
@@ -204,71 +221,69 @@ export default function ServiceListPage() {
               </div>
 
               {/* Size Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full text-gray-700 transition-colors duration-200 dark:border-none dark:text-gray-200 md:w-20"
-                  >
-                    {size}
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  {sizeOptions.map((option) => (
-                    <DropdownMenuItem
-                      key={option.value}
-                      onClick={() => handleSizeChange(option.value)}
-                      className={size === option.value ? "bg-accent" : ""}
+              <div className="w-full md:w-1/2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full text-gray-700 transition-colors duration-200 dark:border-none dark:text-gray-200"
                     >
-                      {option.label}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                      {size}
+                      <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {sizeOptions.map((option) => (
+                      <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => handleSizeChange(option.value)}
+                        className={size === option.value ? "bg-accent" : ""}
+                      >
+                        {option.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Services Table */}
+        {/* Notifications Table */}
         <Card className="animate-scale-in border-0 bg-white/80 shadow-lg backdrop-blur-sm dark:bg-gray-800/80">
           <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50 dark:border-gray-700 dark:from-gray-700 dark:to-gray-800">
             <CardTitle className="flex items-center text-gray-800 dark:text-white">
-              <div className="mr-3 rounded-lg bg-blue-100 p-2 dark:bg-blue-900">
-                <Wrench className="h-5 w-5 text-blue-600 dark:text-blue-300" />
-              </div>
-              Tüm Hizmetler
+              <span className="mr-2 rounded-lg bg-blue-100 p-2 dark:bg-blue-900">
+                <Bell className="h-5 w-5 text-blue-600 dark:text-blue-300" />
+              </span>
+              Tüm Bildirimler
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">
-              Sistemdeki {totalElements} hizmetin listesi
+              Sistemdeki {totalElements} bildirimin listesi
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
             {isLoading ? (
-              <LoaderDots message="Hizmetler yükleniyor..." />
-            ) : services.length === 0 ? (
+              <LoaderDots message="Bildirimler yükleniyor..." />
+            ) : notifications.length === 0 ? (
               <div className="flex h-64 items-center justify-center">
                 <div className="animate-fade-in text-center">
                   <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 p-4">
-                    <Wrench className="h-8 w-8 text-gray-400" />
+                    <Bell className="h-8 w-8 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Hizmet bulunamadı
+                    Bildirim bulunamadı
                   </h3>
                   <p className="mt-2 text-gray-600 dark:text-gray-300">
-                    {debouncedSearch
-                      ? "Arama kriterlerinize uygun hizmet bulunamadı."
-                      : "Henüz hizmet bulunmuyor."}
+                    Henüz bildirim bulunmuyor.
                   </p>
-                  {!debouncedSearch && (
-                    <Button
-                      onClick={() => navigate("/services/create")}
-                      className="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white transition-all duration-200 hover:from-blue-700 hover:to-indigo-700"
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      İlk Hizmeti Ekle
-                    </Button>
-                  )}
+                  <Button
+                    onClick={() => navigate("/notifications/create")}
+                    className="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white transition-all duration-200 hover:from-blue-700 hover:to-indigo-700"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    İlk Bildirimi Ekle
+                  </Button>
                 </div>
               </div>
             ) : (
@@ -277,10 +292,13 @@ export default function ServiceListPage() {
                   <TableHeader>
                     <TableRow className="hover:bg-transparent">
                       <TableHead className="font-semibold text-gray-900 dark:text-white">
-                        Hizmet
+                        Başlık
                       </TableHead>
                       <TableHead className="font-semibold text-gray-900 dark:text-white">
-                        Açıklama
+                        Tür
+                      </TableHead>
+                      <TableHead className="font-semibold text-gray-900 dark:text-white">
+                        İçerik
                       </TableHead>
                       <TableHead className="text-center font-semibold text-gray-900 dark:text-white">
                         İşlemler
@@ -288,63 +306,33 @@ export default function ServiceListPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {services.map((service: Service, index) => (
+                    {notifications.map((notification: Notification, index) => (
                       <TableRow
-                        key={service.id}
+                        key={notification.id}
                         className="animate-fade-in group transition-colors duration-200 hover:bg-blue-50/50 dark:hover:bg-gray-700/50"
                         style={{ animationDelay: `${index * 0.05}s` }}
                       >
                         <TableCell className="py-4">
                           <div className="flex items-center space-x-3">
-                            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-medium text-white">
-                              {service.icon &&
-                              typeof service.icon === "string" ? (
-                                <img
-                                  src={service.icon}
-                                  alt={service.name}
-                                  className="h-full w-full object-cover"
-                                  onError={(e) => {
-                                    // Icon yüklenemezse fallback'e geç
-                                    (
-                                      e.target as HTMLImageElement
-                                    ).style.display = "none";
-                                    const fallbackElement = (
-                                      e.target as HTMLImageElement
-                                    ).nextElementSibling as HTMLElement;
-                                    if (fallbackElement) {
-                                      fallbackElement.classList.remove(
-                                        "hidden",
-                                      );
-                                    }
-                                  }}
-                                />
-                              ) : null}
-                              <div
-                                className={`flex h-full w-full items-center justify-center ${
-                                  service.icon &&
-                                  typeof service.icon === "string"
-                                    ? "hidden"
-                                    : ""
-                                }`}
-                              >
-                                {service.name.charAt(0).toUpperCase()}
-                              </div>
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-medium text-white">
+                              {notification.title.charAt(0).toUpperCase()}
                             </div>
                             <div>
                               <div className="font-medium text-gray-900 transition-colors group-hover:text-blue-900 dark:text-white dark:group-hover:text-blue-300">
-                                {service.name}
+                                {notification.title}
                               </div>
                               <div className="text-sm text-gray-500 dark:text-gray-400">
-                                ID: #{service.id}
+                                ID: #{notification.id}
                               </div>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell className="py-4">
-                          <div className="max-w-md text-gray-600 transition-colors group-hover:text-gray-800 dark:text-gray-300 dark:group-hover:text-gray-100">
-                            <p className="truncate" title={service.description}>
-                              {service.description}
-                            </p>
+                          {getTypeBadge(notification.type)}
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="max-w-xs truncate text-gray-600 transition-colors group-hover:text-gray-800 dark:text-gray-300 dark:group-hover:text-gray-100">
+                            {notification.content}
                           </div>
                         </TableCell>
                         <TableCell className="py-4">
@@ -353,7 +341,9 @@ export default function ServiceListPage() {
                               variant="ghost"
                               size="sm"
                               title="Görüntüle"
-                              onClick={() => handleViewService(service.id)}
+                              onClick={() =>
+                                handleViewNotification(notification.id)
+                              }
                               className="transition-all duration-200 hover:bg-blue-100 hover:text-blue-700"
                             >
                               <Eye className="h-4 w-4" />
@@ -363,7 +353,9 @@ export default function ServiceListPage() {
                               size="sm"
                               title="Düzenle"
                               onClick={() =>
-                                navigate(`/services/edit/${service.id}`)
+                                navigate(
+                                  `/notifications/edit/${notification.id}`,
+                                )
                               }
                               className="transition-all duration-200 hover:bg-green-100 hover:text-green-700"
                             >
@@ -372,12 +364,26 @@ export default function ServiceListPage() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              title="Gönder"
+                              onClick={() => handleSend(notification)}
+                              disabled={sendNotificationMutation.isPending}
+                              className="from-blue-300 to-indigo-500 transition-all duration-300 hover:bg-gradient-to-b hover:text-white disabled:opacity-50"
+                            >
+                              {sendNotificationMutation.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Send className="h-4 w-4" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               title="Sil"
-                              onClick={() => handleDelete(service)}
-                              disabled={deleteServiceMutation.isPending}
+                              onClick={() => handleDelete(notification)}
+                              disabled={deleteNotificationMutation.isPending}
                               className="transition-all duration-200 hover:bg-red-100 hover:text-red-700 disabled:opacity-50"
                             >
-                              {deleteServiceMutation.isPending ? (
+                              {deleteNotificationMutation.isPending ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
                                 <Trash2 className="h-4 w-4" />
@@ -404,6 +410,9 @@ export default function ServiceListPage() {
 
       {/* Delete Confirmation Modal */}
       <DeleteModal />
+
+      {/* Send Confirmation Modal */}
+      <SendModal />
     </>
   );
 }

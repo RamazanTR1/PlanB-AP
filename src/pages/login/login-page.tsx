@@ -153,7 +153,7 @@ export default function LoginPage() {
 
         <div className="mt-6 text-center">
           <p className="text-xs text-muted-foreground">
-            © 2024 PlanB Admin Panel. All rights reserved.
+            © 2025 PlanB Admin Panel. All rights reserved.
           </p>
         </div>
       </div>

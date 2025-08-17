@@ -12,7 +12,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ArrowLeft, Wrench, Loader2, Upload, X } from "lucide-react";
+import { ArrowLeft, Wrench, Loader2, Upload, X, Save } from "lucide-react";
 import LoaderDots from "@/components/ui/loader-dots";
 import { useUpdateService, useServiceById } from "@/hooks/use-service";
 import { useState, useEffect, useRef } from "react";
@@ -312,10 +312,13 @@ export default function ServiceEditPage() {
                   {updateServiceMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Güncelleniyor...
+                      Kaydediliyor...
                     </>
                   ) : (
-                    "Hizmeti Güncelle"
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Kaydet
+                    </>
                   )}
                 </Button>
               </div>

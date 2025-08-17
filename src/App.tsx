@@ -32,6 +32,10 @@ import SliderListPage from "./pages/slider/slider-list-page";
 import SliderCreatePage from "./pages/slider/slider-create-page";
 import SliderEditPage from "./pages/slider/slider-edit-page";
 import SliderDetailPage from "./pages/slider/slider-detail-page";
+import NotificationListPage from "./pages/notification/notification-list-page";
+import NotificationCreatePage from "./pages/notification/notification-create-page";
+import NotificationEditPage from "./pages/notification/notification-edit-page";
+import NotificationDetailPage from "./pages/notification/notification-detail-page";
 
 const queryClient = new QueryClient();
 
@@ -97,6 +101,22 @@ export default function App() {
                 <Route path="/sliders/edit/:id" element={<SliderEditPage />} />
                 <Route path="/sliders/:id" element={<SliderDetailPage />} />
                 <Route path="/settings" element={<SettingsEditPage />} />
+                <Route
+                  path="/notifications"
+                  element={<NotificationListPage />}
+                />
+                <Route
+                  path="/notifications/create"
+                  element={<NotificationCreatePage />}
+                />
+                <Route
+                  path="/notifications/edit/:id"
+                  element={<NotificationEditPage />}
+                />
+                <Route
+                  path="/notifications/:id"
+                  element={<NotificationDetailPage />}
+                />
               </Route>
             </Route>
             <Route path="/login" element={<LoginPage />} />

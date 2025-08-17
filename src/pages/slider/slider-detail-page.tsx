@@ -68,10 +68,10 @@ export default function SliderDetailPage() {
                   {slider.excerpt}
                 </p>
               )}
-              {slider.tagIds?.length ? (
+              {slider.tags?.length ? (
                 <div className="flex flex-wrap items-center gap-2">
                   <Tags className="h-4 w-4 text-gray-500" />
-                  {slider.tagIds.map((t) => (
+                  {slider.tags.map((t) => (
                     <span
                       key={t.id}
                       className="rounded-md bg-blue-100 px-2 py-0.5 text-xs text-blue-800 dark:bg-blue-900/40 dark:text-blue-200"

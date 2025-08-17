@@ -95,7 +95,9 @@ export default function PortfolioListPage() {
     (portfolio: Portfolio) => {
       openDeleteModal({
         entityType: "portfolio",
-        entityName: portfolio.title,
+        entityName: portfolio.name,
+        requireTextConfirmation: true,
+        confirmationText: portfolio.name,
         onConfirm: async () => {
           await deleteMutation.mutateAsync(portfolio.id);
         },
@@ -280,13 +282,13 @@ export default function PortfolioListPage() {
                   <TableBody>
                     {items.map((p: Portfolio, index) => (
                       <TableRow
-                        key={p.id}
+                        key={p.name}
                         className="animate-fade-in group transition-colors duration-200 hover:bg-blue-50/50 dark:hover:bg-gray-700/50"
                         style={{ animationDelay: `${index * 0.05}s` }}
                       >
                         <TableCell className="py-4">
                           <div className="font-medium text-gray-900 transition-colors group-hover:text-blue-900 dark:text-white dark:group-hover:text-blue-300">
-                            {p.title}
+                            {p.name}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">
                             ID: #{p.id}

@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/form";
 import {
   ArrowLeft,
-  Save,
+  Plus,
   Users,
   User,
   Quote,
@@ -490,7 +490,7 @@ export default function TeamMemberCreatePage() {
                 </>
               ) : (
                 <>
-                  <Save className="mr-2 h-4 w-4" />
+                  <Plus className="mr-2 h-4 w-4" />
                   Takım Üyesi Oluştur
                 </>
               )}

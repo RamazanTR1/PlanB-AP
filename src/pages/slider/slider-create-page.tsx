@@ -30,6 +30,7 @@ export default function SliderCreatePage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<SliderFormData>({
     resolver: zodResolver(sliderSchema) as never,
@@ -120,13 +121,7 @@ export default function SliderCreatePage() {
                   }))}
                   onValueChange={(values: string[]) => {
                     const nums = values.map((v) => Number(v));
-                    (
-                      register("tagIds").onChange as unknown as (e: {
-                        target: { value: number[] };
-                      }) => void
-                    )({
-                      target: { value: nums },
-                    });
+                    setValue("tagIds", nums);
                   }}
                   defaultValue={[]}
                   placeholder="Etiket seçin"
@@ -148,10 +143,15 @@ export default function SliderCreatePage() {
                     type="file"
                     accept="image/*"
                     className="border-gray-200 bg-white file:mr-4 file:rounded-md file:text-sm file:font-medium file:text-blue-700 dark:border-gray-700 dark:bg-gray-800 dark:file:text-blue-100"
-                    {...register("image")}
                     onChange={(e) => {
                       const file = e.target.files?.[0] || null;
-                      if (file) setPreview(URL.createObjectURL(file));
+                      if (file) {
+                        setPreview(URL.createObjectURL(file));
+                        const event = {
+                          target: { name: "image", value: file },
+                        };
+                        register("image").onChange(event);
+                      }
                     }}
                   />
                   {preview && (
@@ -161,8 +161,9 @@ export default function SliderCreatePage() {
                         alt="preview"
                         className="h-40 w-full rounded-md border border-gray-200 object-cover dark:border-gray-600"
                       />
-                      <button
+                      <Button
                         type="button"
+                        variant="outline"
                         onClick={() => {
                           setPreview(null);
                           const fileInput = document.getElementById(
@@ -185,7 +186,7 @@ export default function SliderCreatePage() {
                             d="M6 18L18 6M6 6l12 12"
                           />
                         </svg>
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>

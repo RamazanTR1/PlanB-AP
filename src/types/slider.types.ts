@@ -15,7 +15,7 @@ export interface Slider {
   description: string;
   excerpt: string;
   image: string;
-  tagIds: Tag[];
+  tags: Tag[];
 }
 
 export interface SliderList {

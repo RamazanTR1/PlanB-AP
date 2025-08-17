@@ -11,8 +11,10 @@ import {
   Mail,
   Shield,
   Clock,
+  Loader2,
 } from "lucide-react";
-import { useUserById } from "@/hooks/use-user";
+import { useUserById, useDeleteUserById } from "@/hooks/use-user";
+import { useDeleteConfirmation } from "@/hooks/use-delete-confirmation";
 
 export default function UserDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +22,24 @@ export default function UserDetailPage() {
   const userId = id ? parseInt(id, 10) : 0;
 
   const { data: user, isLoading, error } = useUserById(userId);
+  const deleteUserMutation = useDeleteUserById();
+  const { openDeleteModal, DeleteModal } = useDeleteConfirmation();
+
+  const handleDelete = () => {
+    if (!user) return;
+
+    openDeleteModal({
+      entityType: "kullanıcı",
+      entityName: user.username,
+      requireTextConfirmation: true,
+      confirmationText: user.username,
+      onConfirm: async () => {
+        await deleteUserMutation.mutateAsync(userId);
+        navigate("/users");
+      },
+      isLoading: deleteUserMutation.isPending,
+    });
+  };
 
   if (isLoading) {
     return (
@@ -133,6 +153,7 @@ export default function UserDetailPage() {
             <div className="flex flex-row gap-3 md:min-w-fit md:flex-col">
               <Button
                 variant="outline"
+                onClick={() => navigate(`/users/edit/${id}`)}
                 className="flex flex-1 items-center justify-center gap-2 border-gray-200 bg-white/90 text-gray-700 shadow-sm transition-all duration-200 hover:scale-105 dark:border-none dark:bg-gray-800/90 dark:text-gray-200 md:flex-none"
               >
                 <Edit className="h-4 w-4" />
@@ -140,9 +161,15 @@ export default function UserDetailPage() {
               </Button>
               <Button
                 variant="destructive"
+                onClick={handleDelete}
                 className="flex flex-1 items-center justify-center gap-2 shadow-sm transition-all duration-200 hover:scale-105 md:flex-none"
+                disabled={deleteUserMutation.isPending}
               >
-                <Trash2 className="h-4 w-4" />
+                {deleteUserMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
                 <span className="hidden sm:inline">Sil</span>
               </Button>
             </div>
@@ -312,6 +339,9 @@ export default function UserDetailPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete Modal */}
+      <DeleteModal />
     </div>
   );
 }

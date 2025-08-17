@@ -26,8 +26,8 @@ import {
   Users,
   Loader2,
   Filter,
-  User,
   Hash,
+  User,
 } from "lucide-react";
 import LoaderDots from "@/components/ui/loader-dots";
 import {
@@ -232,9 +232,9 @@ export default function TeamMemberListPage() {
         <Card className="animate-scale-in border-0 bg-white/80 shadow-lg backdrop-blur-sm dark:bg-gray-800/80">
           <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50 dark:border-gray-700 dark:from-gray-700 dark:to-gray-800">
             <CardTitle className="flex items-center text-gray-800 dark:text-white">
-              <div className="mr-3 rounded-lg bg-blue-100 p-2 dark:bg-blue-900">
+              <span className="mr-2 rounded-lg bg-blue-100 p-2 dark:bg-blue-900">
                 <Users className="h-5 w-5 text-blue-600 dark:text-blue-300" />
-              </div>
+              </span>
               Tüm Takım Üyeleri
             </CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">
@@ -243,10 +243,7 @@ export default function TeamMemberListPage() {
           </CardHeader>
           <CardContent className="p-6">
             {isLoading ? (
-              <LoaderDots
-                message="Takım üyeleri yükleniyor..."
-                heightClass="h-32"
-              />
+              <LoaderDots message="Takım üyeleri yükleniyor..." />
             ) : teamMembers.length === 0 ? (
               <div className="flex h-64 items-center justify-center">
                 <div className="animate-fade-in text-center">
@@ -259,15 +256,13 @@ export default function TeamMemberListPage() {
                   <p className="mt-2 text-gray-600 dark:text-gray-300">
                     Henüz takım üyesi bulunmuyor.
                   </p>
-                  {
-                    <Button
-                      onClick={() => navigate("/team-members/create")}
-                      className="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white transition-all duration-200 hover:from-blue-700 hover:to-indigo-700"
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      İlk Takım Üyesini Ekle
-                    </Button>
-                  }
+                  <Button
+                    onClick={() => navigate("/team-members/create")}
+                    className="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white transition-all duration-200 hover:from-blue-700 hover:to-indigo-700"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    İlk Takım Üyesini Ekle
+                  </Button>
                 </div>
               </div>
             ) : (
@@ -290,7 +285,7 @@ export default function TeamMemberListPage() {
                       <TableHead className="font-semibold text-gray-900 dark:text-white">
                         Pozisyon
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-900 dark:text-white">
+                      <TableHead className="text-center font-semibold text-gray-900 dark:text-white">
                         İşlemler
                       </TableHead>
                     </TableRow>
@@ -409,10 +404,10 @@ export default function TeamMemberListPage() {
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
-
-        {/* Delete Confirmation Modal */}
-        <DeleteModal />
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteModal />
     </>
   );
 }

@@ -34,6 +34,7 @@ export default function SliderEditPage() {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isValid },
   } = useForm<SliderFormData>({
     resolver: zodResolver(sliderSchema) as never,
@@ -48,7 +49,7 @@ export default function SliderEditPage() {
         name: data.name,
         description: data.description,
         excerpt: data.excerpt,
-        tagIds: data.tagIds?.map((t) => t.id) || [],
+        tagIds: data.tags?.map((t) => t.id) || [],
         image: null,
       });
       setPreview(data.image || null);
@@ -59,7 +60,7 @@ export default function SliderEditPage() {
     await updateMutation.mutateAsync({
       name: form.name.trim(),
       description: form.description.trim(),
-      excerpt: (form.excerpt || "").trim(),
+      excerpt: form.excerpt || "",
       tagIds: form.tagIds ?? [],
       image: form.image ?? null,
     });
@@ -134,15 +135,9 @@ export default function SliderEditPage() {
                   }))}
                   onValueChange={(values: string[]) => {
                     const nums = values.map((v) => Number(v));
-                    (
-                      register("tagIds").onChange as unknown as (e: {
-                        target: { value: number[] };
-                      }) => void
-                    )({
-                      target: { value: nums },
-                    });
+                    setValue("tagIds", nums);
                   }}
-                  defaultValue={(data?.tagIds || []).map((t) => String(t.id))}
+                  defaultValue={(data?.tags || []).map((t) => String(t.id))}
                   placeholder="Etiket seçin"
                   maxCount={5}
                   className="border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-800"
@@ -161,11 +156,17 @@ export default function SliderEditPage() {
                     id="image"
                     type="file"
                     accept="image/*"
-                    className="border-gray-200 bg-white file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100 dark:border-gray-600 dark:bg-gray-800 dark:file:bg-blue-900/50 dark:file:text-blue-300 dark:hover:file:bg-blue-900/70"
-                    {...register("image")}
+                    className="border-gray-200 bg-white file:mr-4 file:rounded-md file:text-sm file:font-medium file:text-blue-700 dark:border-gray-700 dark:bg-gray-800 dark:file:text-blue-100"
                     onChange={(e) => {
                       const file = e.target.files?.[0] || null;
-                      if (file) setPreview(URL.createObjectURL(file));
+                      if (file) {
+                        setPreview(URL.createObjectURL(file));
+                        // Form değerini manuel olarak güncelle
+                        const event = {
+                          target: { name: "image", value: file },
+                        };
+                        register("image").onChange(event);
+                      }
                     }}
                   />
                   {preview && (
@@ -218,13 +219,19 @@ export default function SliderEditPage() {
               <Button
                 type="submit"
                 disabled={!isValid || updateMutation.isPending}
+                className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white transition-all duration-200 hover:scale-105 hover:from-emerald-700 hover:to-teal-700"
               >
                 {updateMutation.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Kaydediliyor...
+                  </>
                 ) : (
-                  <Save className="mr-2 h-4 w-4" />
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Kaydet
+                  </>
                 )}
-                Kaydet
               </Button>
             </div>
           </form>
