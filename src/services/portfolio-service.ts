@@ -26,9 +26,24 @@ export const getPortfolioById = async (id: number) => {
 };
 
 export const createPortfolio = async (request: PortfolioRequest) => {
-  return fetchClient<PortfolioRequest, Portfolio>(`/admin/portfolios`, {
+  const baseData = {
+    name: request.name,
+    description: request.description,
+    excerpt: request.excerpt,
+    ...(request.outSourceLink ? { outSourceLink: request.outSourceLink } : {}),
+    publishDate: request.publishDate,
+  } as const;
+
+  const assetsEntries = (request.assets ?? []).map((asset, index) => ({
+    [`assets[${index}].asset`]: asset.file,
+    [`assets[${index}].isCovered`]: asset.isCovered,
+  }));
+
+  const body = Object.assign({}, baseData, ...assetsEntries);
+
+  return fetchClient<typeof body, Portfolio>(`/admin/portfolios`, {
     method: "POST",
-    body: request,
+    body,
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -39,9 +54,24 @@ export const updatePortfolio = async (
   id: number,
   request: PortfolioRequest,
 ) => {
-  return fetchClient<PortfolioRequest, Portfolio>(`/admin/portfolios/${id}`, {
+  const baseData = {
+    name: request.name,
+    description: request.description,
+    excerpt: request.excerpt,
+    ...(request.outSourceLink ? { outSourceLink: request.outSourceLink } : {}),
+    publishDate: request.publishDate,
+  } as const;
+
+  const assetsEntries = (request.assets ?? []).map((asset, index) => ({
+    [`assets[${index}].asset`]: asset.file,
+    [`assets[${index}].isCovered`]: asset.isCovered,
+  }));
+
+  const body = Object.assign({}, baseData, ...assetsEntries);
+
+  return fetchClient<typeof body, Portfolio>(`/admin/portfolios/${id}`, {
     method: "PUT",
-    body: request,
+    body,
     headers: {
       "Content-Type": "multipart/form-data",
     },

@@ -20,6 +20,7 @@ import {
 } from "@/validations/portfolio.validation";
 import { toBackendDateTime } from "@/utils/date";
 import { useState } from "react";
+import { toast } from "sonner";
 import type { PortfolioRequest } from "@/types/portfolio.types";
 
 export default function PortfolioCreatePage() {
@@ -47,6 +48,24 @@ export default function PortfolioCreatePage() {
   const [coverIndex, setCoverIndex] = useState<number>(0);
   const watchFiles = watch("assets") as FileList | undefined;
 
+  const removeSelectedFile = (removeIndex: number) => {
+    const current = (watchFiles as FileList | undefined) ?? undefined;
+    if (!current) return;
+    const filesArr = Array.from(current).filter(
+      (_, idx) => idx !== removeIndex,
+    );
+    const dt = new DataTransfer();
+    filesArr.slice(0, 5).forEach((f) => dt.items.add(f));
+    setValue("assets", dt.files as unknown as FileList);
+    if (filesArr.length === 0) {
+      setCoverIndex(0);
+    } else if (removeIndex === coverIndex) {
+      setCoverIndex(0);
+    } else if (removeIndex < coverIndex) {
+      setCoverIndex(Math.max(0, coverIndex - 1));
+    }
+  };
+
   const onSubmit = async (data: CreatePortfolioFormData) => {
     console.log(data);
     const files = watchFiles ?? undefined;
@@ -61,7 +80,7 @@ export default function PortfolioCreatePage() {
       assets:
         files && files.length > 0
           ? Array.from(files).map((file, index) => ({
-              asset: file.name,
+              file,
               isCovered: index === coverIndex,
             }))
           : undefined,
@@ -161,7 +180,7 @@ export default function PortfolioCreatePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="files">Görseller (çoklu seçilebilir)</Label>
+              <Label htmlFor="files">Görseller (en fazla 5 adet)</Label>
               <Input
                 id="files"
                 type="file"
@@ -170,7 +189,14 @@ export default function PortfolioCreatePage() {
                 onChange={(e) => {
                   const files = e.target.files;
                   if (files) {
-                    setValue("assets", files);
+                    const selected = Array.from(files);
+                    if (selected.length > 5) {
+                      toast.warning("En fazla 5 görsel yükleyebilirsiniz");
+                    }
+                    const limited = selected.slice(0, 5);
+                    const dt = new DataTransfer();
+                    limited.forEach((f) => dt.items.add(f));
+                    setValue("assets", dt.files as unknown as FileList);
                     setCoverIndex(0);
                   }
                 }}
@@ -191,16 +217,46 @@ export default function PortfolioCreatePage() {
                             : "border-border hover:bg-accent"
                         }`}
                       >
-                        <span className="truncate pr-2" title={file.name}>
-                          {file.name}
-                        </span>
-                        <input
-                          type="radio"
-                          name="cover"
-                          className="h-4 w-4"
-                          checked={coverIndex === idx}
-                          onChange={() => setCoverIndex(idx)}
-                        />
+                        <div className="flex items-center gap-2 pr-2">
+                          <img
+                            alt={file.name}
+                            className="h-12 w-12 rounded object-cover"
+                            src={(() => {
+                              const url = URL.createObjectURL(file);
+                              return url;
+                            })()}
+                            onLoad={(ev) => {
+                              const img = ev.currentTarget as HTMLImageElement;
+                              URL.revokeObjectURL(img.src);
+                            }}
+                          />
+                          <span
+                            className="max-w-[140px] truncate"
+                            title={file.name}
+                          >
+                            {file.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="cover"
+                            className="h-4 w-4"
+                            checked={coverIndex === idx}
+                            onChange={() => setCoverIndex(idx)}
+                          />
+                          <button
+                            type="button"
+                            className="rounded border px-2 py-1 text-xs hover:bg-red-50 dark:hover:bg-red-950/30"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              removeSelectedFile(idx);
+                            }}
+                          >
+                            Kaldır
+                          </button>
+                        </div>
                       </label>
                     ))}
                   </div>

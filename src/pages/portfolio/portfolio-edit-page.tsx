@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { CalendarDays, Loader2, Save } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { toBackendDateTime } from "@/utils/date";
 import type { PortfolioRequest } from "@/types/portfolio.types";
 
@@ -43,6 +44,24 @@ export default function PortfolioEditPage() {
 
   const [coverIndex, setCoverIndex] = useState<number>(0);
   const watchFiles = watch("assets") as FileList | undefined;
+
+  const removeSelectedFile = (removeIndex: number) => {
+    const current = (watchFiles as FileList | undefined) ?? undefined;
+    if (!current) return;
+    const filesArr = Array.from(current).filter(
+      (_, idx) => idx !== removeIndex,
+    );
+    const dt = new DataTransfer();
+    filesArr.slice(0, 5).forEach((f) => dt.items.add(f));
+    setValue("assets", dt.files as unknown as FileList);
+    if (filesArr.length === 0) {
+      setCoverIndex(0);
+    } else if (removeIndex === coverIndex) {
+      setCoverIndex(0);
+    } else if (removeIndex < coverIndex) {
+      setCoverIndex(Math.max(0, coverIndex - 1));
+    }
+  };
 
   useEffect(() => {
     if (data) {
@@ -73,15 +92,10 @@ export default function PortfolioEditPage() {
       assets:
         files && files.length > 0
           ? Array.from(files).map((file, index) => ({
-              asset: file.name,
+              file,
               isCovered: index === coverIndex,
             }))
-          : data?.assets && data.assets.length > 0
-            ? data.assets.map((asset, index) => ({
-                asset: asset.asset,
-                isCovered: index === coverIndex,
-              }))
-            : undefined,
+          : undefined,
     };
 
     await updateMutation.mutateAsync(request);
@@ -175,7 +189,9 @@ export default function PortfolioEditPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="files">Görselleri Güncelle (opsiyonel)</Label>
+              <Label htmlFor="files">
+                Görselleri Güncelle (en fazla 5 adet)
+              </Label>
               <Input
                 id="files"
                 type="file"
@@ -184,7 +200,14 @@ export default function PortfolioEditPage() {
                 onChange={(e) => {
                   const files = e.target.files;
                   if (files) {
-                    setValue("assets", files);
+                    const selected = Array.from(files);
+                    if (selected.length > 5) {
+                      toast.warning("En fazla 5 görsel yükleyebilirsiniz");
+                    }
+                    const limited = selected.slice(0, 5);
+                    const dt = new DataTransfer();
+                    limited.forEach((f) => dt.items.add(f));
+                    setValue("assets", dt.files as unknown as FileList);
                     setCoverIndex(0);
                   }
                 }}
@@ -206,16 +229,46 @@ export default function PortfolioEditPage() {
                             : "border-border hover:bg-accent"
                         }`}
                       >
-                        <span className="truncate pr-2" title={file.name}>
-                          {file.name}
-                        </span>
-                        <input
-                          type="radio"
-                          name="cover"
-                          className="h-4 w-4"
-                          checked={coverIndex === idx}
-                          onChange={() => setCoverIndex(idx)}
-                        />
+                        <div className="flex items-center gap-2 pr-2">
+                          <img
+                            alt={file.name}
+                            className="h-12 w-12 rounded object-cover"
+                            src={(() => {
+                              const url = URL.createObjectURL(file);
+                              return url;
+                            })()}
+                            onLoad={(ev) => {
+                              const img = ev.currentTarget as HTMLImageElement;
+                              URL.revokeObjectURL(img.src);
+                            }}
+                          />
+                          <span
+                            className="max-w-[140px] truncate"
+                            title={file.name}
+                          >
+                            {file.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="cover"
+                            className="h-4 w-4"
+                            checked={coverIndex === idx}
+                            onChange={() => setCoverIndex(idx)}
+                          />
+                          <button
+                            type="button"
+                            className="rounded border px-2 py-1 text-xs hover:bg-red-50 dark:hover:bg-red-950/30"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              removeSelectedFile(idx);
+                            }}
+                          >
+                            Kaldır
+                          </button>
+                        </div>
                       </label>
                     ))}
                   </div>
