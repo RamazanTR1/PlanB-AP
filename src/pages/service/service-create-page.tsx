@@ -97,6 +97,40 @@ export default function ServiceCreatePage() {
         </div>
       </div>
 
+      {/* Icon Upload Notice */}
+      <div className="animate-slide-up rounded-lg border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 p-4 shadow-md dark:border-amber-700 dark:from-amber-900/20 dark:to-yellow-900/20">
+        <div className="flex items-start space-x-3">
+          <div className="flex-shrink-0">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-800">
+              <svg
+                className="h-5 w-5 text-amber-600 dark:text-amber-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-200">
+              Önemli: İkon Yükleme Kuralı
+            </h3>
+            <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
+              <strong>
+                İkonunuzu beyaz renkte ve SVG formatında yükleyiniz!
+              </strong>{" "}
+              Bu, sitenin tasarım tutarlılığı için gereklidir.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Service Create Form */}
       <Card className="animate-scale-in border-0 bg-white/80 shadow-lg backdrop-blur-sm dark:bg-gray-800/80">
         <CardHeader className="border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50 dark:border-gray-700 dark:from-gray-700 dark:to-gray-800">

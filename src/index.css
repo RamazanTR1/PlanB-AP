@@ -67,8 +67,8 @@
     --muted-foreground: 240 2% 60%; /* #98989A - Muted text */
     --accent: 0 0% 20%; /* #333333 - Accent background */
     --accent-foreground: 240 3% 95%; /* #F1F1F3 - Accent text */
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 353 100% 60%; /* #FF314A - Destructive background */
+    --destructive-foreground: 0 0% 100%;
     --border: 0 0% 20%; /* #333333 - Border color */
     --input: 0 0% 15%; /* #262626 - Input background */
     --ring: 240 3% 95%; /* #F1F1F3 - Ring color */

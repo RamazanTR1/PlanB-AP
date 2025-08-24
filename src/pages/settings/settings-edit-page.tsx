@@ -48,16 +48,16 @@ export default function SettingsEditPage() {
   const onSubmit = async (data: UpdateSettingsFormData) => {
     setSubmitted(false);
     await updateMutation.mutateAsync({
-      siteLogo: data.siteLogo.trim(),
-      maintenanceMode: data.maintenanceMode,
-      aboutUsDescription: data.aboutUsDescription.trim(),
-      email: data.email.trim(),
-      instagramUrl: (data.instagramUrl || "").trim(),
-      linkedinUrl: (data.linkedinUrl || "").trim(),
-      youtubeUrl: (data.youtubeUrl || "").trim(),
-      xurl: (data.xurl || "").trim(),
-      teamMembersHeader: data.teamMembersHeader.trim(),
-      teamMembersDescription: data.teamMembersDescription.trim(),
+      siteLogo: data.siteLogo?.trim() || "",
+      maintenanceMode: data.maintenanceMode || false,
+      aboutUsDescription: data.aboutUsDescription?.trim() || "",
+      email: data.email?.trim() || "",
+      instagramUrl: data.instagramUrl?.trim() || "",
+      linkedinUrl: data.linkedinUrl?.trim() || "",
+      youtubeUrl: data.youtubeUrl?.trim() || "",
+      xurl: data.xurl?.trim() || "",
+      teamMembersHeader: data.teamMembersHeader?.trim() || "",
+      teamMembersDescription: data.teamMembersDescription?.trim() || "",
     });
     setSubmitted(true);
   };
@@ -212,7 +212,7 @@ export default function SettingsEditPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="maintenanceMode">Bakım Modu</Label>
-                <div className="flex h-10 items-center rounded-md border border-input bg-background px-3 text-sm">
+                <div className="flex h-10 items-center rounded-md border border-input bg-popover px-3 text-sm">
                   <input
                     id="maintenanceMode"
                     type="checkbox"

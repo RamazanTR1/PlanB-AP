@@ -63,7 +63,7 @@ export default function TeamMemberEditPage() {
       title: "",
       quote: "",
       linkedinUrl: "",
-      orderNumber: 1,
+      orderNumber: undefined,
       profilePhoto: null,
     },
     mode: "onTouched",
@@ -460,8 +460,8 @@ export default function TeamMemberEditPage() {
                           </FormLabel>
                           <FormControl>
                             <Input
-                              type="text"
-                              placeholder="1"
+                              type="number"
+                              placeholder="Sıra numarası"
                               value={field.value || ""}
                               onChange={(e) => {
                                 const value = e.target.value;
@@ -469,7 +469,7 @@ export default function TeamMemberEditPage() {
                                 if (!isNaN(num) && num >= 1 && num <= 999) {
                                   field.onChange(num);
                                 } else if (value === "") {
-                                  field.onChange(1);
+                                  field.onChange(undefined);
                                 }
                               }}
                               className="transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-none"
