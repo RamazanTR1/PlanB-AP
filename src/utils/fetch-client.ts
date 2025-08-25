@@ -61,7 +61,10 @@ export const fetchClient = async <T, U>(
 
   requestOptions.headers = headers;
 
-  const requestUrl = `/api/v1${url}`;
+  // Use the production API URL or fallback to localhost for development
+  const baseUrl =
+    import.meta.env.VITE_API_BASE_URL || "https://panel.planbanimation.com";
+  const requestUrl = `${baseUrl}/api/v1${url}`;
 
   const response = await fetch(requestUrl, requestOptions);
 
@@ -86,7 +89,9 @@ export const fetchClient = async <T, U>(
 };
 
 export const refreshTokens = async (): Promise<boolean> => {
-  const tokensResponse = await fetch("/api/v1/auth/refresh", {
+  const baseUrl =
+    import.meta.env.VITE_API_BASE_URL || "https://panel.planbanimation.com";
+  const tokensResponse = await fetch(`${baseUrl}/api/v1/auth/refresh`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
